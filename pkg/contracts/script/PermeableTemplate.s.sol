@@ -24,9 +24,7 @@ contract PermeableTemplateScript is Script {
         stakes[0] = 100e18;
 
         t.newToken("Governance Token", "GOV");
-        t.newInstance(
-            "permeable", holders, stakes, [uint64(50e16), uint64(5e16), uint64(7 days)], uint64(30 days), false
-        );
+        t.newInstance("permeable", holders, stakes, [uint64(50e16), uint64(5e16), uint64(7 days)], false, 0, 0);
 
         vm.stopBroadcast();
     }
