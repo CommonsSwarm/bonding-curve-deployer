@@ -6,4 +6,5 @@
     "editor.formatOnSave": true
   },
   "solidity.formatter": "forge",
+  "solidity.compileUsingRemoteVersion": "v0.4.24+commit.e67f0147",
 }
