@@ -11,6 +11,14 @@ interface AugmentedBondingCurve {
         uint256 _buyFeePct,
         uint256 _sellFeePct
     ) external;
+
+    function MANAGE_COLLATERAL_TOKEN_ROLE() external returns (bytes32);
+    function addCollateralToken(
+        address _collateral,
+        uint256 _virtualSupply,
+        uint256 _virtualBalance,
+        uint32 _reserveRatio
+    ) external;
 }
 
 contract PermeableTemplate is BaseTemplate, TokenCache {
@@ -22,6 +30,9 @@ contract PermeableTemplate is BaseTemplate, TokenCache {
     uint8 private constant TOKEN_DECIMALS = uint8(18);
     uint256 private constant TOKEN_MAX_PER_ACCOUNT = uint256(0);
     uint64 private constant DEFAULT_FINANCE_PERIOD = uint64(30 days);
+
+    uint256 private constant VIRTUAL_SUPPLY = uint256(0);
+    uint256 private constant VIRTUAL_BALANCE = uint256(0);
 
     bytes32 internal constant ABC_APP_ID = 0x952fcbadf8d7288f1a8b47ed7ee931702318b527558093398674db0c93e3a75b;
 
@@ -47,7 +58,6 @@ contract PermeableTemplate is BaseTemplate, TokenCache {
      * @param _holders Array of token holder addresses
      * @param _stakes Array of token stakes for holders (token has 18 decimals, multiply token amount `* 10^18`)
      * @param _votingSettings Array of [supportRequired, minAcceptanceQuorum, voteDuration] to set up the voting app of the organization
-     * @param _useAgentAsVault Boolean to tell whether to use an Agent app as a more advanced form of Vault app
      * @param _buyFeePct Fee percentage when buying tokens from ABC
      * @param _sellFeePct Fee percentage when selling tokens from ABC
      */
@@ -58,12 +68,13 @@ contract PermeableTemplate is BaseTemplate, TokenCache {
         address[] calldata _holders,
         uint256[] calldata _stakes,
         uint64[3] calldata _votingSettings,
-        bool _useAgentAsVault,
         uint256 _buyFeePct,
-        uint256 _sellFeePct
+        uint256 _sellFeePct,
+        address _collateralToken,
+        uint32 _reserveRatio
     ) external {
         newToken(_tokenName, _tokenSymbol);
-        newInstance(_id, _holders, _stakes, _votingSettings, _useAgentAsVault, _buyFeePct, _sellFeePct);
+        newInstance(_id, _holders, _stakes, _votingSettings, _buyFeePct, _sellFeePct, _collateralToken, _reserveRatio);
     }
 
     /**
@@ -83,23 +94,24 @@ contract PermeableTemplate is BaseTemplate, TokenCache {
      * @param _holders Array of token holder addresses
      * @param _stakes Array of token stakes for holders (token has 18 decimals, multiply token amount `* 10^18`)
      * @param _votingSettings Array of [supportRequired, minAcceptanceQuorum, voteDuration] to set up the voting app of the organization
-     * @param _useAgentAsVault Boolean to tell whether to use an Agent app as a more advanced form of Vault app
      */
     function newInstance(
         string memory _id,
         address[] memory _holders,
         uint256[] memory _stakes,
         uint64[3] memory _votingSettings,
-        bool _useAgentAsVault,
         uint256 _buyFeePct,
-        uint256 _sellFeePct
+        uint256 _sellFeePct,
+        address _collateralToken,
+        uint32 _reserveRatio
     ) public {
         _validateId(_id);
         _ensureSettings(_holders, _stakes, _votingSettings);
 
         (Kernel dao, ACL acl) = _createDAO();
-        (Finance finance, Voting voting) =
-            _setupApps(dao, acl, _holders, _stakes, _votingSettings, _useAgentAsVault, _buyFeePct, _sellFeePct);
+        (Finance finance, Voting voting) = _setupApps(
+            dao, acl, _holders, _stakes, _votingSettings, _buyFeePct, _sellFeePct, _collateralToken, _reserveRatio
+        );
         _transferCreatePaymentManagerFromTemplate(acl, finance, address(voting));
         _transferRootPermissionsFromTemplateAndFinalizeDAO(dao, address(voting));
         _registerID(_id, address(dao));
@@ -111,23 +123,38 @@ contract PermeableTemplate is BaseTemplate, TokenCache {
         address[] memory _holders,
         uint256[] memory _stakes,
         uint64[3] memory _votingSettings,
-        bool _useAgentAsVault,
         uint256 _buyFeePct,
-        uint256 _sellFeePct
+        uint256 _sellFeePct,
+        address _collateralToken,
+        uint32 _reserveRatio
     ) internal returns (Finance, Voting) {
-        MiniMeToken token = _popTokenCache(msg.sender);
-        Vault agentOrVault = _useAgentAsVault ? Vault(address(_installDefaultAgentApp(_dao))) : _installVaultApp(_dao);
-        Finance finance = _installFinanceApp(_dao, agentOrVault, DEFAULT_FINANCE_PERIOD);
-        TokenManager tokenManager = _installTokenManagerApp(_dao, token, TOKEN_TRANSFERABLE, TOKEN_MAX_PER_ACCOUNT);
-        Voting voting = _installVotingApp(_dao, token, _votingSettings);
+        // 0: token, 1: agent, 2: finance, 3: token manager, 4: voting
+        address[] memory apps = new address[](5);
 
-        _mintTokens(_acl, tokenManager, _holders, _stakes);
-        _setupPermissions(_acl, agentOrVault, voting, finance, tokenManager, _useAgentAsVault);
+        apps[0] = address(_popTokenCache(msg.sender));
+        apps[1] = address(_installDefaultAgentApp(_dao));
+        apps[2] = address(_installFinanceApp(_dao, Vault(apps[1]), DEFAULT_FINANCE_PERIOD));
+        apps[3] =
+            address(_installTokenManagerApp(_dao, MiniMeToken(apps[0]), TOKEN_TRANSFERABLE, TOKEN_MAX_PER_ACCOUNT));
+        apps[4] = address(_installVotingApp(_dao, MiniMeToken(apps[0]), _votingSettings));
 
-        _setupPermeableApps(_dao, _acl, tokenManager, address(agentOrVault), _buyFeePct, _sellFeePct, address(voting));
-        _transferTokenManagerFromTemplate(_acl, tokenManager, address(voting));
+        _mintTokens(_acl, TokenManager(apps[3]), _holders, _stakes);
+        _setupPermissions(_acl, Vault(apps[1]), Voting(apps[4]), Finance(apps[2]), TokenManager(apps[3]));
 
-        return (finance, voting);
+        _setupPermeableApps(
+            _dao,
+            _acl,
+            TokenManager(apps[3]),
+            apps[1],
+            _buyFeePct,
+            _sellFeePct,
+            _collateralToken,
+            _reserveRatio,
+            apps[4]
+        );
+        _transferTokenManagerFromTemplate(_acl, TokenManager(apps[3]), apps[4]);
+
+        return (Finance(apps[2]), Voting(apps[4]));
     }
 
     function _setupPermissions(
@@ -135,12 +162,9 @@ contract PermeableTemplate is BaseTemplate, TokenCache {
         Vault _agentOrVault,
         Voting _voting,
         Finance _finance,
-        TokenManager _tokenManager,
-        bool _useAgentAsVault
+        TokenManager _tokenManager
     ) internal {
-        if (_useAgentAsVault) {
-            _createAgentPermissions(_acl, Agent(address(_agentOrVault)), address(_voting), address(_voting));
-        }
+        _createAgentPermissions(_acl, Agent(address(_agentOrVault)), address(_voting), address(_voting));
         _createVaultPermissions(_acl, _agentOrVault, address(_finance), address(_voting));
         _createFinancePermissions(_acl, _finance, address(_voting), address(_voting));
         _createFinanceCreatePaymentsPermission(_acl, _finance, address(_voting), address(this));
@@ -156,6 +180,8 @@ contract PermeableTemplate is BaseTemplate, TokenCache {
         address _beneficiary,
         uint256 _buyFeePct,
         uint256 _sellFeePct,
+        address _collateralToken,
+        uint32 _reserveRatio,
         address _vaultManager
     ) internal {
         // install new permeable vault
@@ -166,6 +192,7 @@ contract PermeableTemplate is BaseTemplate, TokenCache {
         AugmentedBondingCurve _augmentedBondingCurve = _installAugmentedBondingCurve(
             _dao, _tokenManager, _formula, _permeableVault, _beneficiary, _buyFeePct, _sellFeePct
         );
+        _configureAugmentedBondingCurve(_augmentedBondingCurve, _acl, _collateralToken, _reserveRatio);
 
         // last thing to do
         _setupPermeablePermissions(_acl, _tokenManager, _permeableVault, _augmentedBondingCurve, _vaultManager);
@@ -211,6 +238,32 @@ contract PermeableTemplate is BaseTemplate, TokenCache {
             _sellFeePct
         );
         return AugmentedBondingCurve(_installNonDefaultApp(_dao, ABC_APP_ID, initializeData));
+    }
+
+    function _configureAugmentedBondingCurve(
+        AugmentedBondingCurve _augmentedBondingCurve,
+        ACL _acl,
+        address _collateralToken,
+        uint32 _reserveRatio
+    ) internal {
+        // add permissions
+        _acl.createPermission(
+            address(this),
+            address(_augmentedBondingCurve),
+            _augmentedBondingCurve.MANAGE_COLLATERAL_TOKEN_ROLE(),
+            address(this)
+        );
+
+        //function MANAGE_COLLATERAL_TOKEN_ROLE() external returns (bytes32);
+        _augmentedBondingCurve.addCollateralToken(_collateralToken, VIRTUAL_SUPPLY, VIRTUAL_BALANCE, _reserveRatio);
+
+        // remove permissions
+        _acl.revokePermission(
+            address(this), address(_augmentedBondingCurve), _augmentedBondingCurve.MANAGE_COLLATERAL_TOKEN_ROLE()
+        );
+        _acl.removePermissionManager(
+            address(_augmentedBondingCurve), _augmentedBondingCurve.MANAGE_COLLATERAL_TOKEN_ROLE()
+        );
     }
 
     function _ensureSettings(address[] memory _holders, uint256[] memory _stakes, uint64[3] memory _votingSettings)

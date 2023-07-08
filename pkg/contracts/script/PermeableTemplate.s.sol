@@ -15,6 +15,11 @@ contract PermeableTemplateScript is Script {
     function run() public {
         vm.startBroadcast();
 
+        address _collateralToken = 0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d;
+        uint32 _reserveRatio = 20e4; // 20%
+        uint256 _buyFeePct = 10;
+        uint256 _sellFeePct = 20;
+
         PermeableTemplate t = new PermeableTemplate(daoFactory, ens, miniMeFactory, aragonID);
 
         address[] memory holders = new address[](1);
@@ -24,7 +29,16 @@ contract PermeableTemplateScript is Script {
         stakes[0] = 100e18;
 
         t.newToken("Governance Token", "GOV");
-        t.newInstance("permeable", holders, stakes, [uint64(50e16), uint64(5e16), uint64(7 days)], false, 0, 0);
+        t.newInstance(
+            "permeable",
+            holders,
+            stakes,
+            [uint64(50e16), uint64(5e16), uint64(7 days)],
+            _buyFeePct,
+            _sellFeePct,
+            _collateralToken,
+            _reserveRatio
+        );
 
         vm.stopBroadcast();
     }
