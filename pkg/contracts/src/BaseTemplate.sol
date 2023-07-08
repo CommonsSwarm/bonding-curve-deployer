@@ -1,18 +1,8 @@
-pragma solidity 0.4.24;
-
-import "@aragon/os/contracts/acl/ACL.sol";
-import "@aragon/os/contracts/apm/Repo.sol";
-import "@aragon/os/contracts/apm/APMNamehash.sol";
-import "@aragon/os/contracts/kernel/Kernel.sol";
-import "@aragon/os/contracts/lib/ens/ENS.sol";
-import "@aragon/os/contracts/lib/ens/PublicResolver.sol";
-import "@aragon/os/contracts/factory/DAOFactory.sol";
-import "@aragon/os/contracts/common/IsContract.sol";
-import "@aragon/os/contracts/common/Uint256Helpers.sol";
+pragma solidity 0.6.2;
 
 interface IFIFSResolvingRegistrar {
     function register(bytes32 _subnode, address _owner) external;
-    function registerWithResolver(bytes32 _subnode, address _owner, address _resolver) public;
+    function registerWithResolver(bytes32 _subnode, address _owner, address _resolver) external;
 }
 
 interface Agent {
@@ -53,9 +43,9 @@ interface MiniMeTokenFactory {
     function createCloneToken(
         MiniMeToken _parentToken,
         uint256 _snapshotBlock,
-        string _tokenName,
+        string calldata _tokenName,
         uint8 _decimalUnits,
-        string _tokenSymbol,
+        string calldata _tokenSymbol,
         bool _transfersEnabled
     ) external returns (MiniMeToken);
 }
@@ -64,13 +54,78 @@ interface MiniMeToken {
     function changeController(address _newController) external;
 }
 
+interface ACL {
+    function createPermission(address _entity, address _app, bytes32 _role, address _manager) external;
+    function grantPermission(address _entity, address _app, bytes32 _role) external;
+    function revokePermission(address _entity, address _app, bytes32 _role) external;
+    function setPermissionManager(address _manager, address _app, bytes32 _role) external;
+    function removePermissionManager(address _app, bytes32 _role) external;
+    function CREATE_PERMISSIONS_ROLE() external returns (bytes32);
+    function getEVMScriptRegistry() external view returns (EVMScriptRegistry);
+}
+
+interface Repo {
+    function getLatest()
+        external
+        view
+        returns (uint16[3] memory semanticVersion, address contractAddress, bytes memory contentURI);
+}
+
+interface DAOFactory {
+    function newDAO(address _root) external returns (Kernel dao);
+}
+
+interface EVMScriptRegistry {
+    function REGISTRY_MANAGER_ROLE() external returns (bytes32);
+    function REGISTRY_ADD_EXECUTOR_ROLE() external returns (bytes32);
+}
+
+interface Kernel {
+    function acl() external view returns (ACL);
+    function APP_MANAGER_ROLE() external returns (bytes32);
+    function setRecoveryVaultAppId(bytes32 _id) external;
+    function newAppInstance(bytes32 _appId, address _appBase, bytes calldata _initializeData, bool _default)
+        external
+        returns (address);
+}
+
+interface ENS {
+    function resolver(bytes32 _node) external view returns (PublicResolver);
+}
+
+interface PublicResolver {
+    function addr(bytes32 _node) external view returns (address);
+}
+
+library Uint256Helpers {
+    uint256 private constant MAX_UINT64 = uint64(-1);
+
+    string private constant ERROR_NUMBER_TOO_BIG = "UINT64_NUMBER_TOO_BIG";
+
+    function toUint64(uint256 a) internal pure returns (uint64) {
+        require(a <= MAX_UINT64, ERROR_NUMBER_TOO_BIG);
+        return uint64(a);
+    }
+}
+
+contract APMNamehash {
+    /* Hardcoded constants to save gas
+    bytes32 internal constant APM_NODE = keccak256(abi.encodePacked(ETH_TLD_NODE, keccak256(abi.encodePacked("aragonpm"))));
+    */
+    bytes32 internal constant APM_NODE = 0x9065c3e7f7b7ef1ef4e53d2d0b8e0cef02874ab020c1ece79d5f0d3d0111c0ba;
+
+    function apmNamehash(string memory name) internal pure returns (bytes32) {
+        return keccak256(abi.encodePacked(APM_NODE, keccak256(bytes(name))));
+    }
+}
+
 contract TokenCache {
     string private constant ERROR_MISSING_TOKEN_CACHE = "TEMPLATE_MISSING_TOKEN_CACHE";
 
     mapping(address => address) internal tokenCache;
 
     function _cacheToken(MiniMeToken _token, address _owner) internal {
-        tokenCache[_owner] = _token;
+        tokenCache[_owner] = address(_token);
     }
 
     function _popTokenCache(address _owner) internal returns (MiniMeToken) {
@@ -82,7 +137,28 @@ contract TokenCache {
     }
 }
 
-contract BaseTemplate is APMNamehash, IsContract {
+contract IsContract {
+    /*
+    * NOTE: this should NEVER be used for authentication
+    * (see pitfalls: https://github.com/fergarrui/ethereum-security/tree/master/contracts/extcodesize).
+    *
+    * This is only intended to be used as a sanity check that an address is actually a contract,
+    * RATHER THAN an address not being a contract.
+    */
+    function isContract(address _target) internal view returns (bool) {
+        if (_target == address(0)) {
+            return false;
+        }
+
+        uint256 size;
+        assembly {
+            size := extcodesize(_target)
+        }
+        return size > 0;
+    }
+}
+
+abstract contract BaseTemplate is APMNamehash, IsContract {
     using Uint256Helpers for uint256;
 
     /* Hardcoded constant to save gas
@@ -136,10 +212,10 @@ contract BaseTemplate is APMNamehash, IsContract {
      *      permissions to the end entity in control of the organization.
      */
     function _createDAO() internal returns (Kernel dao, ACL acl) {
-        dao = daoFactory.newDAO(this);
+        dao = daoFactory.newDAO(address(this));
         emit DeployDao(address(dao));
         acl = ACL(dao.acl());
-        _createPermissionForTemplate(acl, dao, dao.APP_MANAGER_ROLE());
+        _createPermissionForTemplate(acl, address(dao), dao.APP_MANAGER_ROLE());
     }
 
     /* ACL */
@@ -174,9 +250,9 @@ contract BaseTemplate is APMNamehash, IsContract {
 
     function _transferRootPermissionsFromTemplateAndFinalizeDAO(Kernel _dao, address _to, address _manager) internal {
         ACL _acl = ACL(_dao.acl());
-        _transferPermissionFromTemplate(_acl, _dao, _to, _dao.APP_MANAGER_ROLE(), _manager);
-        _transferPermissionFromTemplate(_acl, _acl, _to, _acl.CREATE_PERMISSIONS_ROLE(), _manager);
-        emit SetupDao(_dao);
+        _transferPermissionFromTemplate(_acl, address(_dao), _to, _dao.APP_MANAGER_ROLE(), _manager);
+        _transferPermissionFromTemplate(_acl, address(_acl), _to, _acl.CREATE_PERMISSIONS_ROLE(), _manager);
+        emit SetupDao(address(_dao));
     }
 
     function _transferPermissionFromTemplate(ACL _acl, address _app, address _to, bytes32 _permission, address _manager)
@@ -204,8 +280,8 @@ contract BaseTemplate is APMNamehash, IsContract {
     }
 
     function _createAgentPermissions(ACL _acl, Agent _agent, address _grantee, address _manager) internal {
-        _acl.createPermission(_grantee, _agent, _agent.EXECUTE_ROLE(), _manager);
-        _acl.createPermission(_grantee, _agent, _agent.RUN_SCRIPT_ROLE(), _manager);
+        _acl.createPermission(_grantee, address(_agent), _agent.EXECUTE_ROLE(), _manager);
+        _acl.createPermission(_grantee, address(_agent), _agent.RUN_SCRIPT_ROLE(), _manager);
     }
 
     /* VAULT */
@@ -216,7 +292,7 @@ contract BaseTemplate is APMNamehash, IsContract {
     }
 
     function _createVaultPermissions(ACL _acl, Vault _vault, address _grantee, address _manager) internal {
-        _acl.createPermission(_grantee, _vault, _vault.TRANSFER_ROLE(), _manager);
+        _acl.createPermission(_grantee, address(_vault), _vault.TRANSFER_ROLE(), _manager);
     }
 
     /* VOTING */
@@ -244,9 +320,9 @@ contract BaseTemplate is APMNamehash, IsContract {
         address _createVotesGrantee,
         address _manager
     ) internal {
-        _acl.createPermission(_settingsGrantee, _voting, _voting.MODIFY_QUORUM_ROLE(), _manager);
-        _acl.createPermission(_settingsGrantee, _voting, _voting.MODIFY_SUPPORT_ROLE(), _manager);
-        _acl.createPermission(_createVotesGrantee, _voting, _voting.CREATE_VOTES_ROLE(), _manager);
+        _acl.createPermission(_settingsGrantee, address(_voting), _voting.MODIFY_QUORUM_ROLE(), _manager);
+        _acl.createPermission(_settingsGrantee, address(_voting), _voting.MODIFY_SUPPORT_ROLE(), _manager);
+        _acl.createPermission(_createVotesGrantee, address(_voting), _voting.CREATE_VOTES_ROLE(), _manager);
     }
 
     /* FINANCE */
@@ -257,22 +333,22 @@ contract BaseTemplate is APMNamehash, IsContract {
     }
 
     function _createFinancePermissions(ACL _acl, Finance _finance, address _grantee, address _manager) internal {
-        _acl.createPermission(_grantee, _finance, _finance.EXECUTE_PAYMENTS_ROLE(), _manager);
-        _acl.createPermission(_grantee, _finance, _finance.MANAGE_PAYMENTS_ROLE(), _manager);
+        _acl.createPermission(_grantee, address(_finance), _finance.EXECUTE_PAYMENTS_ROLE(), _manager);
+        _acl.createPermission(_grantee, address(_finance), _finance.MANAGE_PAYMENTS_ROLE(), _manager);
     }
 
     function _createFinanceCreatePaymentsPermission(ACL _acl, Finance _finance, address _grantee, address _manager)
         internal
     {
-        _acl.createPermission(_grantee, _finance, _finance.CREATE_PAYMENTS_ROLE(), _manager);
+        _acl.createPermission(_grantee, address(_finance), _finance.CREATE_PAYMENTS_ROLE(), _manager);
     }
 
     function _grantCreatePaymentPermission(ACL _acl, Finance _finance, address _to) internal {
-        _acl.grantPermission(_to, _finance, _finance.CREATE_PAYMENTS_ROLE());
+        _acl.grantPermission(_to, address(_finance), _finance.CREATE_PAYMENTS_ROLE());
     }
 
     function _transferCreatePaymentManagerFromTemplate(ACL _acl, Finance _finance, address _manager) internal {
-        _acl.setPermissionManager(_manager, _finance, _finance.CREATE_PAYMENTS_ROLE());
+        _acl.setPermissionManager(_manager, address(_finance), _finance.CREATE_PAYMENTS_ROLE());
     }
 
     /* TOKEN MANAGER */
@@ -282,48 +358,48 @@ contract BaseTemplate is APMNamehash, IsContract {
         returns (TokenManager)
     {
         TokenManager tokenManager = TokenManager(_installNonDefaultApp(_dao, TOKEN_MANAGER_APP_ID));
-        _token.changeController(tokenManager);
-        tokenManager.initialize(_token, _transferable, _maxAccountTokens);
+        _token.changeController(address(tokenManager));
+        tokenManager.initialize(address(_token), _transferable, _maxAccountTokens);
         return tokenManager;
     }
 
     function _createTokenManagerPermissions(ACL _acl, TokenManager _tokenManager, address _grantee, address _manager)
         internal
     {
-        _acl.createPermission(_grantee, _tokenManager, _tokenManager.MINT_ROLE(), _manager);
-        _acl.createPermission(_grantee, _tokenManager, _tokenManager.BURN_ROLE(), _manager);
+        _acl.createPermission(_grantee, address(_tokenManager), _tokenManager.MINT_ROLE(), _manager);
+        _acl.createPermission(_grantee, address(_tokenManager), _tokenManager.BURN_ROLE(), _manager);
     }
 
     function _mintTokens(ACL _acl, TokenManager _tokenManager, address[] memory _holders, uint256[] memory _stakes)
         internal
     {
-        _createPermissionForTemplate(_acl, _tokenManager, _tokenManager.MINT_ROLE());
+        _createPermissionForTemplate(_acl, address(_tokenManager), _tokenManager.MINT_ROLE());
         for (uint256 i = 0; i < _holders.length; i++) {
             _tokenManager.mint(_holders[i], _stakes[i]);
         }
-        _removePermissionFromTemplate(_acl, _tokenManager, _tokenManager.MINT_ROLE());
+        _removePermissionFromTemplate(_acl, address(_tokenManager), _tokenManager.MINT_ROLE());
     }
 
     function _mintTokens(ACL _acl, TokenManager _tokenManager, address[] memory _holders, uint256 _stake) internal {
-        _createPermissionForTemplate(_acl, _tokenManager, _tokenManager.MINT_ROLE());
+        _createPermissionForTemplate(_acl, address(_tokenManager), _tokenManager.MINT_ROLE());
         for (uint256 i = 0; i < _holders.length; i++) {
             _tokenManager.mint(_holders[i], _stake);
         }
-        _removePermissionFromTemplate(_acl, _tokenManager, _tokenManager.MINT_ROLE());
+        _removePermissionFromTemplate(_acl, address(_tokenManager), _tokenManager.MINT_ROLE());
     }
 
     function _mintTokens(ACL _acl, TokenManager _tokenManager, address _holder, uint256 _stake) internal {
-        _createPermissionForTemplate(_acl, _tokenManager, _tokenManager.MINT_ROLE());
+        _createPermissionForTemplate(_acl, address(_tokenManager), _tokenManager.MINT_ROLE());
         _tokenManager.mint(_holder, _stake);
-        _removePermissionFromTemplate(_acl, _tokenManager, _tokenManager.MINT_ROLE());
+        _removePermissionFromTemplate(_acl, address(_tokenManager), _tokenManager.MINT_ROLE());
     }
 
     /* EVM SCRIPTS */
 
     function _createEvmScriptsRegistryPermissions(ACL _acl, address _grantee, address _manager) internal {
         EVMScriptRegistry registry = EVMScriptRegistry(_acl.getEVMScriptRegistry());
-        _acl.createPermission(_grantee, registry, registry.REGISTRY_MANAGER_ROLE(), _manager);
-        _acl.createPermission(_grantee, registry, registry.REGISTRY_ADD_EXECUTOR_ROLE(), _manager);
+        _acl.createPermission(_grantee, address(registry), registry.REGISTRY_MANAGER_ROLE(), _manager);
+        _acl.createPermission(_grantee, address(registry), registry.REGISTRY_ADD_EXECUTOR_ROLE(), _manager);
     }
 
     /* APPS */

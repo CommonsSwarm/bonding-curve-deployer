@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity 0.6.2;
 
 import "./BaseTemplate.sol";
 
@@ -12,12 +12,17 @@ contract PermeableTemplate is BaseTemplate, TokenCache {
     uint256 private constant TOKEN_MAX_PER_ACCOUNT = uint256(0);
     uint64 private constant DEFAULT_FINANCE_PERIOD = uint64(30 days);
 
-    constructor(DAOFactory _daoFactory, ENS _ens, MiniMeTokenFactory _miniMeFactory, IFIFSResolvingRegistrar _aragonID)
+    constructor(address _daoFactory, address _ens, address _miniMeFactory, address _aragonID)
         public
-        BaseTemplate(_daoFactory, _ens, _miniMeFactory, _aragonID)
+        BaseTemplate(
+            DAOFactory(_daoFactory),
+            ENS(_ens),
+            MiniMeTokenFactory(_miniMeFactory),
+            IFIFSResolvingRegistrar(_aragonID)
+        )
     {
-        _ensureAragonIdIsValid(_aragonID);
-        _ensureMiniMeFactoryIsValid(_miniMeFactory);
+        _ensureAragonIdIsValid(address(_aragonID));
+        _ensureMiniMeFactoryIsValid(address(_miniMeFactory));
     }
 
     /**
@@ -33,12 +38,12 @@ contract PermeableTemplate is BaseTemplate, TokenCache {
      * @param _useAgentAsVault Boolean to tell whether to use an Agent app as a more advanced form of Vault app
      */
     function newTokenAndInstance(
-        string _tokenName,
-        string _tokenSymbol,
-        string _id,
-        address[] _holders,
-        uint256[] _stakes,
-        uint64[3] _votingSettings,
+        string calldata _tokenName,
+        string calldata _tokenSymbol,
+        string calldata _id,
+        address[] calldata _holders,
+        uint256[] calldata _stakes,
+        uint64[3] calldata _votingSettings,
         uint64 _financePeriod,
         bool _useAgentAsVault
     ) external {
@@ -80,9 +85,9 @@ contract PermeableTemplate is BaseTemplate, TokenCache {
         (Kernel dao, ACL acl) = _createDAO();
         (Finance finance, Voting voting) =
             _setupApps(dao, acl, _holders, _stakes, _votingSettings, _financePeriod, _useAgentAsVault);
-        _transferCreatePaymentManagerFromTemplate(acl, finance, voting);
-        _transferRootPermissionsFromTemplateAndFinalizeDAO(dao, voting);
-        _registerID(_id, dao);
+        _transferCreatePaymentManagerFromTemplate(acl, finance, address(voting));
+        _transferRootPermissionsFromTemplateAndFinalizeDAO(dao, address(voting));
+        _registerID(_id, address(dao));
     }
 
     function _setupApps(
@@ -116,14 +121,14 @@ contract PermeableTemplate is BaseTemplate, TokenCache {
         bool _useAgentAsVault
     ) internal {
         if (_useAgentAsVault) {
-            _createAgentPermissions(_acl, Agent(_agentOrVault), _voting, _voting);
+            _createAgentPermissions(_acl, Agent(address(_agentOrVault)), address(_voting), address(_voting));
         }
-        _createVaultPermissions(_acl, _agentOrVault, _finance, _voting);
-        _createFinancePermissions(_acl, _finance, _voting, _voting);
-        _createFinanceCreatePaymentsPermission(_acl, _finance, _voting, address(this));
-        _createEvmScriptsRegistryPermissions(_acl, _voting, _voting);
-        _createVotingPermissions(_acl, _voting, _voting, _tokenManager, _voting);
-        _createTokenManagerPermissions(_acl, _tokenManager, _voting, _voting);
+        _createVaultPermissions(_acl, _agentOrVault, address(_finance), address(_voting));
+        _createFinancePermissions(_acl, _finance, address(_voting), address(_voting));
+        _createFinanceCreatePaymentsPermission(_acl, _finance, address(_voting), address(this));
+        _createEvmScriptsRegistryPermissions(_acl, address(_voting), address(_voting));
+        _createVotingPermissions(_acl, _voting, address(_voting), address(_tokenManager), address(_voting));
+        _createTokenManagerPermissions(_acl, _tokenManager, address(_voting), address(_voting));
     }
 
     function _ensureSettings(address[] memory _holders, uint256[] memory _stakes, uint64[3] memory _votingSettings)

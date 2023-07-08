@@ -7,6 +7,6 @@
     "build": "forge build --sizes",
     "lint": "forge fmt",
     "test": "forge test -vvv",
-    "deploy": "forge script script/Counter.s.sol --rpc-url http://localhost:8545 --broadcast"
+    "deploy": "forge script script/PermeableTemplate.s.sol --rpc-url http://localhost:8545 --broadcast"
   }
 }
