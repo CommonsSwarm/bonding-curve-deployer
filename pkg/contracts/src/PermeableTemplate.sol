@@ -124,7 +124,7 @@ contract PermeableTemplate is BaseTemplate, TokenCache {
         _mintTokens(_acl, tokenManager, _holders, _stakes);
         _setupPermissions(_acl, agentOrVault, voting, finance, tokenManager, _useAgentAsVault);
 
-        _setupPermeableApps(_dao, _acl, tokenManager, address(agentOrVault), _buyFeePct, _sellFeePct);
+        _setupPermeableApps(_dao, _acl, tokenManager, address(agentOrVault), _buyFeePct, _sellFeePct, address(voting));
         _transferTokenManagerFromTemplate(_acl, tokenManager, address(voting));
 
         return (finance, voting);
@@ -147,7 +147,7 @@ contract PermeableTemplate is BaseTemplate, TokenCache {
         _createEvmScriptsRegistryPermissions(_acl, address(_voting), address(_voting));
         _createVotingPermissions(_acl, _voting, address(_voting), address(_tokenManager), address(_voting));
         _createTokenManagerPermissions(_acl, _tokenManager, address(_voting), address(this));
-    
+    }
 
     function _setupPermeableApps(
         Kernel _dao,
@@ -155,7 +155,8 @@ contract PermeableTemplate is BaseTemplate, TokenCache {
         TokenManager _tokenManager,
         address _beneficiary,
         uint256 _buyFeePct,
-        uint256 _sellFeePct
+        uint256 _sellFeePct,
+        address _vaultManager
     ) internal {
         // install new permeable vault
         Vault _permeableVault = _installVaultApp(_dao);
@@ -167,16 +168,17 @@ contract PermeableTemplate is BaseTemplate, TokenCache {
         );
 
         // last thing to do
-        _setupPermeablePermissions(_acl, _tokenManager, _permeableVault, _augmentedBondingCurve);
+        _setupPermeablePermissions(_acl, _tokenManager, _permeableVault, _augmentedBondingCurve, _vaultManager);
     }
 
     function _setupPermeablePermissions(
         ACL _acl,
         TokenManager _tokenManager,
         Vault _permeableVault,
-        AugmentedBondingCurve _augmentedBondingCurve
+        AugmentedBondingCurve _augmentedBondingCurve,
+        address _vaultManager
     ) internal {
-        _createVaultPermissions(_acl, _permeableVault, address(_augmentedBondingCurve), address(_augmentedBondingCurve));
+        _createVaultPermissions(_acl, _permeableVault, address(_augmentedBondingCurve), _vaultManager);
         _grantTokenManagerPermissions(_acl, _tokenManager, address(_augmentedBondingCurve));
     }
 
