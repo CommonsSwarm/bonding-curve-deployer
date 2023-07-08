@@ -23,15 +23,9 @@ contract PermeableTemplateScript is Script {
         uint256[] memory stakes = new uint256[](1);
         stakes[0] = 100e18;
 
-        t.newTokenAndInstance(
-            "Governance Token",
-            "GOV",
-            "permeable",
-            holders,
-            stakes,
-            [uint64(50e16), uint64(5e16), uint64(7 days)],
-            uint64(30 days),
-            true
+        t.newToken("Governance Token", "GOV");
+        t.newInstance(
+            "permeable", holders, stakes, [uint64(50e16), uint64(5e16), uint64(7 days)], uint64(30 days), false
         );
 
         vm.stopBroadcast();

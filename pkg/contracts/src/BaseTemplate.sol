@@ -25,7 +25,7 @@ interface Voting {
 }
 
 interface Finance {
-    function initialize(address _token, uint256 _periodDuration, uint256 _initialPeriod) external;
+    function initialize(address _token, uint64 _periodDuration) external;
     function CREATE_PAYMENTS_ROLE() external returns (bytes32);
     function EXECUTE_PAYMENTS_ROLE() external returns (bytes32);
     function MANAGE_PAYMENTS_ROLE() external returns (bytes32);
@@ -84,7 +84,7 @@ interface Kernel {
     function acl() external view returns (ACL);
     function APP_MANAGER_ROLE() external returns (bytes32);
     function setRecoveryVaultAppId(bytes32 _id) external;
-    function newAppInstance(bytes32 _appId, address _appBase, bytes calldata _initializeData, bool _default)
+    function newAppInstance(bytes32 _appId, address _appBase, bytes calldata _initializePayload, bool _setDefault)
         external
         returns (address);
 }
