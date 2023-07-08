@@ -34,8 +34,7 @@ contract PermeableTemplateScript is Script {
             holders,
             stakes,
             [uint64(50e16), uint64(5e16), uint64(7 days)],
-            _buyFeePct,
-            _sellFeePct,
+            [uint256(_buyFeePct), uint256(_sellFeePct)],
             _collateralToken,
             _reserveRatio
         );

@@ -58,8 +58,7 @@ contract PermeableTemplate is BaseTemplate, TokenCache {
      * @param _holders Array of token holder addresses
      * @param _stakes Array of token stakes for holders (token has 18 decimals, multiply token amount `* 10^18`)
      * @param _votingSettings Array of [supportRequired, minAcceptanceQuorum, voteDuration] to set up the voting app of the organization
-     * @param _buyFeePct Fee percentage when buying tokens from ABC
-     * @param _sellFeePct Fee percentage when selling tokens from ABC
+     * @param _fees Array of [buyFee, sellFee] to sep up the abc of the organization
      */
     function newTokenAndInstance(
         string calldata _tokenName,
@@ -68,13 +67,12 @@ contract PermeableTemplate is BaseTemplate, TokenCache {
         address[] calldata _holders,
         uint256[] calldata _stakes,
         uint64[3] calldata _votingSettings,
-        uint256 _buyFeePct,
-        uint256 _sellFeePct,
+        uint256[2] calldata _fees, //0: buy, 1: sell
         address _collateralToken,
         uint32 _reserveRatio
     ) external {
         newToken(_tokenName, _tokenSymbol);
-        newInstance(_id, _holders, _stakes, _votingSettings, _buyFeePct, _sellFeePct, _collateralToken, _reserveRatio);
+        newInstance(_id, _holders, _stakes, _votingSettings, _fees, _collateralToken, _reserveRatio);
     }
 
     /**
@@ -100,8 +98,7 @@ contract PermeableTemplate is BaseTemplate, TokenCache {
         address[] memory _holders,
         uint256[] memory _stakes,
         uint64[3] memory _votingSettings,
-        uint256 _buyFeePct,
-        uint256 _sellFeePct,
+        uint256[2] memory _fees, //0: buy, 1: sell
         address _collateralToken,
         uint32 _reserveRatio
     ) public {
@@ -109,9 +106,8 @@ contract PermeableTemplate is BaseTemplate, TokenCache {
         _ensureSettings(_holders, _stakes, _votingSettings);
 
         (Kernel dao, ACL acl) = _createDAO();
-        (Finance finance, Voting voting) = _setupApps(
-            dao, acl, _holders, _stakes, _votingSettings, _buyFeePct, _sellFeePct, _collateralToken, _reserveRatio
-        );
+        (Finance finance, Voting voting) =
+            _setupApps(dao, acl, _holders, _stakes, _votingSettings, _fees, _collateralToken, _reserveRatio);
         _transferCreatePaymentManagerFromTemplate(acl, finance, address(voting));
         _transferRootPermissionsFromTemplateAndFinalizeDAO(dao, address(voting));
         _registerID(_id, address(dao));
@@ -123,8 +119,7 @@ contract PermeableTemplate is BaseTemplate, TokenCache {
         address[] memory _holders,
         uint256[] memory _stakes,
         uint64[3] memory _votingSettings,
-        uint256 _buyFeePct,
-        uint256 _sellFeePct,
+        uint256[2] memory _fees, //0: buy, 1: sell
         address _collateralToken,
         uint32 _reserveRatio
     ) internal returns (Finance, Voting) {
@@ -141,17 +136,7 @@ contract PermeableTemplate is BaseTemplate, TokenCache {
         _mintTokens(_acl, TokenManager(apps[3]), _holders, _stakes);
         _setupPermissions(_acl, Vault(apps[1]), Voting(apps[4]), Finance(apps[2]), TokenManager(apps[3]));
 
-        _setupPermeableApps(
-            _dao,
-            _acl,
-            TokenManager(apps[3]),
-            apps[1],
-            _buyFeePct,
-            _sellFeePct,
-            _collateralToken,
-            _reserveRatio,
-            apps[4]
-        );
+        _setupPermeableApps(_dao, _acl, TokenManager(apps[3]), apps[1], _fees, _collateralToken, _reserveRatio, apps[4]);
         _transferTokenManagerFromTemplate(_acl, TokenManager(apps[3]), apps[4]);
 
         return (Finance(apps[2]), Voting(apps[4]));
@@ -178,8 +163,7 @@ contract PermeableTemplate is BaseTemplate, TokenCache {
         ACL _acl,
         TokenManager _tokenManager,
         address _beneficiary,
-        uint256 _buyFeePct,
-        uint256 _sellFeePct,
+        uint256[2] memory _fees, //0: buy, 1: sell
         address _collateralToken,
         uint32 _reserveRatio,
         address _vaultManager
@@ -189,9 +173,8 @@ contract PermeableTemplate is BaseTemplate, TokenCache {
 
         address _formula = 0xA4e28453b4F3fcB251EEbe1aC2798eEE55e2bE6a;
 
-        AugmentedBondingCurve _augmentedBondingCurve = _installAugmentedBondingCurve(
-            _dao, _tokenManager, _formula, _permeableVault, _beneficiary, _buyFeePct, _sellFeePct
-        );
+        AugmentedBondingCurve _augmentedBondingCurve =
+            _installAugmentedBondingCurve(_dao, _tokenManager, _formula, _permeableVault, _beneficiary, _fees);
         _configureAugmentedBondingCurve(_augmentedBondingCurve, _acl, _collateralToken, _reserveRatio);
 
         // last thing to do
@@ -225,8 +208,7 @@ contract PermeableTemplate is BaseTemplate, TokenCache {
         address _formula,
         Vault _reserve,
         address _beneficiary,
-        uint256 _buyFeePct,
-        uint256 _sellFeePct
+        uint256[2] memory _fees //0: buy, 1: sell
     ) internal returns (AugmentedBondingCurve) {
         bytes memory initializeData = abi.encodeWithSelector(
             AugmentedBondingCurve(0).initialize.selector,
@@ -234,8 +216,8 @@ contract PermeableTemplate is BaseTemplate, TokenCache {
             _formula,
             _reserve,
             _beneficiary,
-            _buyFeePct,
-            _sellFeePct
+            _fees[0],
+            _fees[1]
         );
         return AugmentedBondingCurve(_installNonDefaultApp(_dao, ABC_APP_ID, initializeData));
     }
