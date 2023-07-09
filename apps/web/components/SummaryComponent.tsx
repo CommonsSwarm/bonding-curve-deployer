@@ -99,7 +99,7 @@ export default function SummaryComponent() {
 
     // Prepare contract
     const { config, error } = usePrepareContractWrite({
-        address: '0x51dCc0B9AD7B77aC87f9Afa5e792dfFB4c8Aa1C8',
+        address: '0xafbb787a94c9bf664294b9d6c7148db538f82f0f',
         abi: abi,
         functionName: 'newTokenAndInstance',
         args: [
