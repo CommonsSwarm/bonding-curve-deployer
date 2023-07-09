@@ -61,8 +61,6 @@ export default function AugmentedBondingCurveComponent() {
         router.push('/token')
     }
 
-    console.log(colateralToken)
-
     return (
         <Box borderWidth="1px" borderRadius="lg" padding="6" boxShadow="lg" width="50vw">
 
