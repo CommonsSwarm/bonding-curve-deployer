@@ -7,7 +7,7 @@ export default class AppStatusStore {
     minutes: number|null = 0;
     tokenName: string|null = null;
     tokenSymbol: string|null = null;
-    tokenHolders: Array<{ address: string | null; balance: number | null; }> | null = [{ address: null, balance: null }];
+    tokenHolders: Array<{ address: string; balance: string; }> | null = [{ address: '', balance: '' }];
     reserveRatio: number|null = 0;
     collateralToken: { address: string | null; symbol: string | null; } | null = { address: "0x4f4F9b8D5B4d0Dc10506e5551B0513B61fD59e75", symbol: "GIV" };
     initialReserve: number|null = 0;

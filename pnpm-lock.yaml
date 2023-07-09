@@ -1,9 +1,5 @@
 lockfileVersion: '6.0'
 
-settings:
-  autoInstallPeers: true
-  excludeLinksFromLockfile: false
-
 importers:
 
   .:
@@ -62,7 +58,7 @@ importers:
     dependencies:
       '@chakra-ui/icons':
         specifier: ^2.0.19
-        version: 2.0.19(@chakra-ui/system@2.5.8)(react@18.2.0)
+        version: 2.0.19(react@18.2.0)
       '@chakra-ui/react':
         specifier: ^2.7.1
         version: 2.7.1(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(@types/react@18.0.26)(framer-motion@10.12.18)(react-dom@18.2.0)(react@18.2.0)
@@ -95,7 +91,7 @@ importers:
         version: link:../../pkg/ui
       wagmi:
         specifier: ^0.10.10
-        version: 0.10.10(@babel/core@7.20.12)(@tanstack/query-core@4.22.0)(ethers@5.7.2)(react-dom@18.2.0)(react@18.2.0)(typescript@4.9.4)
+        version: 0.10.10(@babel/core@7.20.12)(ethers@5.7.2)(react-dom@18.2.0)(react@18.2.0)(typescript@4.9.4)
     devDependencies:
       '@babel/core':
         specifier: ^7.0.0
@@ -119,7 +115,7 @@ importers:
         specifier: workspace:*
         version: link:../../pkg/tsconfig
       typescript:
-        specifier: ^4.5.3
+        specifier: '4.9'
         version: 4.9.4
 
   pkg/contracts: {}
@@ -157,10 +153,10 @@ importers:
         version: 5.16.5
       '@testing-library/react':
         specifier: ^13.4.0
-        version: 13.4.0(react-dom@18.2.0)(react@18.2.0)
+        version: 13.4.0(react@18.2.0)
       '@testing-library/user-event':
         specifier: ^14.4.3
-        version: 14.4.3(@testing-library/dom@8.20.0)
+        version: 14.4.3
       '@types/react':
         specifier: ^18.0.17
         version: 18.0.26
@@ -169,7 +165,7 @@ importers:
         version: 18.0.10
       '@vitejs/plugin-react':
         specifier: ^3.1.0
-        version: 3.1.0(vite@4.1.1)
+        version: 3.1.0
       '@vitest/coverage-c8':
         specifier: ^0.28.4
         version: 0.28.4(jsdom@21.1.0)
@@ -725,14 +721,23 @@ packages:
       react: 18.2.0
     dev: false
 
-  /@chakra-ui/icons@2.0.19(@chakra-ui/system@2.5.8)(react@18.2.0):
+  /@chakra-ui/icon@3.0.16(react@18.2.0):
+    resolution: {integrity: sha512-RpA1X5Ptz8Mt39HSyEIW1wxAz2AXyf9H0JJ5HVx/dBdMZaGMDJ0HyyPBVci0m4RCoJuyG1HHG/DXJaVfUTVAeg==}
+    peerDependencies:
+      '@chakra-ui/system': '>=2.0.0'
+      react: '>=18'
+    dependencies:
+      '@chakra-ui/shared-utils': 2.0.5
+      react: 18.2.0
+    dev: false
+
+  /@chakra-ui/icons@2.0.19(react@18.2.0):
     resolution: {integrity: sha512-0A6U1ZBZhLIxh3QgdjuvIEhAZi3B9v8g6Qvlfa3mu6vSnXQn2CHBZXmJwxpXxO40NK/2gj/gKXrLeUaFR6H/Qw==}
     peerDependencies:
       '@chakra-ui/system': '>=2.0.0'
       react: '>=18'
     dependencies:
-      '@chakra-ui/icon': 3.0.16(@chakra-ui/system@2.5.8)(react@18.2.0)
-      '@chakra-ui/system': 2.5.8(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(react@18.2.0)
+      '@chakra-ui/icon': 3.0.16(react@18.2.0)
       react: 18.2.0
     dev: false
 
@@ -2549,7 +2554,7 @@ packages:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       react-remove-scroll: 2.5.4(@types/react@18.0.26)(react@18.2.0)
-      wagmi: 0.10.10(@babel/core@7.20.12)(@tanstack/query-core@4.22.0)(ethers@5.7.2)(react-dom@18.2.0)(react@18.2.0)(typescript@4.9.4)
+      wagmi: 0.10.10(@babel/core@7.20.12)(ethers@5.7.2)(react-dom@18.2.0)(react@18.2.0)(typescript@4.9.4)
     transitivePeerDependencies:
       - '@types/react'
     dev: false
@@ -2721,28 +2726,26 @@ packages:
     resolution: {integrity: sha512-OeLyBKBQoT265f5G9biReijeP8mBxNFwY7ZUu1dKL+YzqpG5q5z7J/N1eT8aWyKuhyDTiUHuKm5l+oIVzbtrjw==}
     dev: false
 
-  /@tanstack/query-persist-client-core@4.22.0(@tanstack/query-core@4.22.0):
+  /@tanstack/query-persist-client-core@4.22.0:
     resolution: {integrity: sha512-O5Qh4HycMWPD67qoGs9zwNJuCpQnbgAgpWmg/M5+jpWaobGGtdIW6SHuvVogQM53uTaWT8b30ymi4BKds4GxIA==}
     peerDependencies:
       '@tanstack/query-core': 4.22.0
-    dependencies:
-      '@tanstack/query-core': 4.22.0
     dev: false
 
-  /@tanstack/query-sync-storage-persister@4.22.0(@tanstack/query-core@4.22.0):
+  /@tanstack/query-sync-storage-persister@4.22.0:
     resolution: {integrity: sha512-NtsekSPrJC+qMFncs0cqzyqFWW3rZU6EwGwgqM+u7PnjYQBiOyrD7yB8V6rJEIDVvSpakS1jPyzKDxpexrUk8g==}
     dependencies:
-      '@tanstack/query-persist-client-core': 4.22.0(@tanstack/query-core@4.22.0)
+      '@tanstack/query-persist-client-core': 4.22.0
     transitivePeerDependencies:
       - '@tanstack/query-core'
     dev: false
 
-  /@tanstack/react-query-persist-client@4.22.0(@tanstack/query-core@4.22.0)(@tanstack/react-query@4.22.0):
+  /@tanstack/react-query-persist-client@4.22.0(@tanstack/react-query@4.22.0):
     resolution: {integrity: sha512-E9eAstffzr+PMsKcgTI6AfMMYtUjV6w3VKCa/0v9wGWdGEJYKcjNJWyYiPF0Z0ccwAaDCeOuQCFId8y0BKCK8g==}
     peerDependencies:
       '@tanstack/react-query': 4.22.0
     dependencies:
-      '@tanstack/query-persist-client-core': 4.22.0(@tanstack/query-core@4.22.0)
+      '@tanstack/query-persist-client-core': 4.22.0
       '@tanstack/react-query': 4.22.0(react-dom@18.2.0)(react@18.2.0)
     transitivePeerDependencies:
       - '@tanstack/query-core'
@@ -2795,7 +2798,7 @@ packages:
       redent: 3.0.0
     dev: true
 
-  /@testing-library/react@13.4.0(react-dom@18.2.0)(react@18.2.0):
+  /@testing-library/react@13.4.0(react@18.2.0):
     resolution: {integrity: sha512-sXOGON+WNTh3MLE9rve97ftaZukN3oNf2KjDy7YTx6hcTO2uuLHuCGynMDhFwGw/jYf4OJ2Qk0i4i79qMNNkyw==}
     engines: {node: '>=12'}
     peerDependencies:
@@ -2806,16 +2809,13 @@ packages:
       '@testing-library/dom': 8.20.0
       '@types/react-dom': 18.0.10
       react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
     dev: true
 
-  /@testing-library/user-event@14.4.3(@testing-library/dom@8.20.0):
+  /@testing-library/user-event@14.4.3:
     resolution: {integrity: sha512-kCUc5MEwaEMakkO5x7aoD+DLi02ehmEM2QCGWvNqAS1dV/fAvORWEjnjsEIvml59M7Y5kCkWN6fCCyPOe8OL6Q==}
     engines: {node: '>=12', npm: '>=6'}
     peerDependencies:
       '@testing-library/dom': '>=7.21.4'
-    dependencies:
-      '@testing-library/dom': 8.20.0
     dev: true
 
   /@tootallnate/once@2.0.0:
@@ -3066,7 +3066,7 @@ packages:
       '@vanilla-extract/css': 1.9.1
     dev: false
 
-  /@vitejs/plugin-react@3.1.0(vite@4.1.1):
+  /@vitejs/plugin-react@3.1.0:
     resolution: {integrity: sha512-AfgcRL8ZBhAlc3BFdigClmTUMISmmzHn7sB2h9U1odvc5U/MjWXsAaz18b/WoppUTDBzxOJwo2VdClfUcItu9g==}
     engines: {node: ^14.18.0 || >=16.0.0}
     peerDependencies:
@@ -3077,7 +3077,6 @@ packages:
       '@babel/plugin-transform-react-jsx-source': 7.19.6(@babel/core@7.20.12)
       magic-string: 0.27.0
       react-refresh: 0.14.0
-      vite: 4.1.1(@types/node@17.0.45)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -4082,6 +4081,7 @@ packages:
     requiresBuild: true
     dependencies:
       node-gyp-build: 4.6.0
+    dev: false
 
   /c8@7.12.0:
     resolution: {integrity: sha512-CtgQrHOkyxr5koX1wEUmN/5cfDa2ckbHRA4Gy5LAL0zaCFtVWJS5++n+w4/sr2GWGerBxgTjpKeDclk/Qk6W/A==}
@@ -6053,7 +6053,7 @@ packages:
       whatwg-encoding: 2.0.0
       whatwg-mimetype: 3.0.0
       whatwg-url: 11.0.0
-      ws: 8.12.0(bufferutil@4.0.7)(utf-8-validate@5.0.10)
+      ws: 8.12.0
       xml-name-validator: 4.0.0
     transitivePeerDependencies:
       - bufferutil
@@ -6442,6 +6442,7 @@ packages:
   /node-gyp-build@4.6.0:
     resolution: {integrity: sha512-NTZVKn9IylLwUzaKjkas1e4u2DLNcV4rdYagA4PWdPwW87Bi7z+BznyKSRwS/761tV/lzCGXplWsiaMjLqP2zQ==}
     hasBin: true
+    dev: false
 
   /node-releases@2.0.8:
     resolution: {integrity: sha512-dFSmB8fFHEH/s81Xi+Y/15DQY6VHW81nXRj86EMSL3lmuTmK1e+aT4wrFCkTbm+gSwkw4KpX+rT/pMM2c1mF+A==}
@@ -6894,6 +6895,7 @@ packages:
       loose-envify: 1.4.0
       react: 18.2.0
       scheduler: 0.23.0
+    dev: false
 
   /react-fast-compare@3.2.1:
     resolution: {integrity: sha512-xTYf9zFim2pEif/Fw16dBiXpe0hoy5PxcD8+OwBnTtNLfIm3g6WxhKNurY+6OmdH1u6Ta/W/Vl6vjbYP1MFnDg==}
@@ -7187,6 +7189,7 @@ packages:
     resolution: {integrity: sha512-CtuThmgHNg7zIZWAXi3AsyIzA3n4xx7aNyjwC2VJldO2LMVDhFK+63xGqq6CsJH4rTAt6/M+N4GhZiDYPx9eUw==}
     dependencies:
       loose-envify: 1.4.0
+    dev: false
 
   /scrypt-js@3.0.1:
     resolution: {integrity: sha512-cdwTTnqPu0Hyvf5in5asVdZocVDTNRmR7XEcJuIzMjJeSHybHl7vpB66AzwTaIg6CLSbtjcxc8fqcySfnTkccA==}
@@ -7821,6 +7824,7 @@ packages:
     requiresBuild: true
     dependencies:
       node-gyp-build: 4.6.0
+    dev: false
 
   /util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
@@ -7973,16 +7977,16 @@ packages:
       xml-name-validator: 4.0.0
     dev: true
 
-  /wagmi@0.10.10(@babel/core@7.20.12)(@tanstack/query-core@4.22.0)(ethers@5.7.2)(react-dom@18.2.0)(react@18.2.0)(typescript@4.9.4):
+  /wagmi@0.10.10(@babel/core@7.20.12)(ethers@5.7.2)(react-dom@18.2.0)(react@18.2.0)(typescript@4.9.4):
     resolution: {integrity: sha512-YChCEVXA+AMYdP0p4ds05CBGpM/jEiecCknoGsubq80qjv8M/qg658xbtLOSSpmt190mmkAzut0s2jZ2Hp615w==}
     peerDependencies:
       ethers: '>=5.5.1'
       react: '>=17.0.0'
     dependencies:
       '@coinbase/wallet-sdk': 3.6.3(@babel/core@7.20.12)
-      '@tanstack/query-sync-storage-persister': 4.22.0(@tanstack/query-core@4.22.0)
+      '@tanstack/query-sync-storage-persister': 4.22.0
       '@tanstack/react-query': 4.22.0(react-dom@18.2.0)(react@18.2.0)
-      '@tanstack/react-query-persist-client': 4.22.0(@tanstack/query-core@4.22.0)(@tanstack/react-query@4.22.0)
+      '@tanstack/react-query-persist-client': 4.22.0(@tanstack/react-query@4.22.0)
       '@wagmi/core': 0.8.14(@babel/core@7.20.12)(@coinbase/wallet-sdk@3.6.3)(@walletconnect/ethereum-provider@1.8.0)(ethers@5.7.2)(react@18.2.0)(typescript@4.9.4)
       '@walletconnect/ethereum-provider': 1.8.0
       abitype: 0.2.5(typescript@4.9.4)
@@ -8164,6 +8168,19 @@ packages:
         optional: true
     dev: false
 
+  /ws@8.12.0:
+    resolution: {integrity: sha512-kU62emKIdKVeEIOIKVegvqpXMSTAMLJozpHZaJNDYqBjzlSYXQGviYwN1osDLJ9av68qHd4a2oSjd7yD4pacig==}
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: '>=5.0.2'
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
+    dev: true
+
   /ws@8.12.0(bufferutil@4.0.7)(utf-8-validate@5.0.10):
     resolution: {integrity: sha512-kU62emKIdKVeEIOIKVegvqpXMSTAMLJozpHZaJNDYqBjzlSYXQGviYwN1osDLJ9av68qHd4a2oSjd7yD4pacig==}
     engines: {node: '>=10.0.0'}
@@ -8178,6 +8195,7 @@ packages:
     dependencies:
       bufferutil: 4.0.7
       utf-8-validate: 5.0.10
+    dev: false
 
   /xml-name-validator@4.0.0:
     resolution: {integrity: sha512-ICP2e+jsHvAj2E2lIHxa5tjXRlKDJo4IdvPvCXbXQGdzSfmSpNVyIKMvoZHjDY9DP0zV17iI85o90vRFXNccRw==}
@@ -8312,3 +8330,7 @@ packages:
       bn.js: 4.12.0
       ethereumjs-util: 6.2.1
     dev: false
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false

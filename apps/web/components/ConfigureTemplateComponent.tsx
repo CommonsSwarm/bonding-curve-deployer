@@ -7,7 +7,7 @@ import {
     FormHelperText,
 } from '@chakra-ui/react'
 import { useRouter } from "next/router";
-import { store } from "~/stores/store";
+import { store } from "../stores/store";
 
 export default function ConfigureTemplateComponent() {
 
@@ -20,38 +20,38 @@ export default function ConfigureTemplateComponent() {
     const [minutes, setMinutes] = useState(store.appStatusStore.minutes)
 
     // Sliders
-    function handleSupportChangeInput(event) {
+    function handleSupportChangeInput(event: any) {
         const value = parseInt(event.target.value, 10);
         if (!isNaN(value)) {
             setSupport(value)
         }
     }
 
-    function handleSupportChangeSlider(value) {
+    function handleSupportChangeSlider(value: any) {
         setSupport(value)
     }
 
-    function handleApprovalChangeInput(event) {
+    function handleApprovalChangeInput(event: any) {
         const value = parseInt(event.target.value, 10);
         if (!isNaN(value)) {
             setMinApproval(value)
         }
     }
 
-    function handleApprovalChangeSlider(value) {
+    function handleApprovalChangeSlider(value: any) {
         setMinApproval(value)
     }
 
     // Time
-    function handleDaysChange(event) {
+    function handleDaysChange(event: any) {
         setDays(event.target.value)
     }
 
-    function handleHoursChange(event) {
+    function handleHoursChange(event: any) {
         setHours(event.target.value)
     }
 
-    function handleMinutesChange(event) {
+    function handleMinutesChange(event: any) {
         setMinutes(event.target.value)
     }
 
@@ -83,7 +83,7 @@ export default function ConfigureTemplateComponent() {
                             aria-label='slider-ex-1'
                             min={0}
                             max={100}
-                            value={support}
+                            value={support ?? 0}
                             onChange={handleSupportChangeSlider}
                             flexGrow={1}
                         >
@@ -93,7 +93,7 @@ export default function ConfigureTemplateComponent() {
                             <SliderThumb />
                         </Slider>
                         <InputGroup width="20%">
-                            <Input value={support} onChange={handleSupportChangeInput} type="number" />
+                            <Input value={support ?? 0} onChange={handleSupportChangeInput} type="number" />
                             <InputRightAddon children="%" />
                         </InputGroup>
                     </HStack>
@@ -106,7 +106,7 @@ export default function ConfigureTemplateComponent() {
                             aria-label='slider-ex-1'
                             min={0}
                             max={100}
-                            value={minApproval}
+                            value={minApproval ?? 0}
                             onChange={handleApprovalChangeSlider}
                             flexGrow={1}
                         >
@@ -116,7 +116,7 @@ export default function ConfigureTemplateComponent() {
                             <SliderThumb />
                         </Slider>
                         <InputGroup width="20%">
-                            <Input value={minApproval} onChange={handleApprovalChangeInput} type="number" />
+                            <Input value={minApproval ?? 0} onChange={handleApprovalChangeInput} type="number" />
                             <InputRightAddon children="%" />
                         </InputGroup>
                     </HStack>
@@ -126,15 +126,15 @@ export default function ConfigureTemplateComponent() {
                 <Text fontSize="sm">Vote duration</Text>
                 <HStack>
                     <InputGroup>
-                        <Input value={days} onChange={handleDaysChange} type="number" />
+                        <Input value={days ?? 0} onChange={handleDaysChange} type="number" />
                         <InputRightAddon children="Days" />
                     </InputGroup>
                     <InputGroup>
-                        <Input value={hours} type="number" onChange={handleHoursChange} />
+                        <Input value={hours ?? 0} type="number" onChange={handleHoursChange} />
                         <InputRightAddon children="Hours" />
                     </InputGroup>
                     <InputGroup>
-                        <Input value={minutes} type="number" onChange={handleMinutesChange} />
+                        <Input value={minutes ?? 0} type="number" onChange={handleMinutesChange} />
                         <InputRightAddon children="Minutes" />
                     </InputGroup>
                 </HStack>

@@ -1,7 +1,10 @@
 [profile.default]
+solc = "0.6.2"
 src = 'pkg/contracts/src'
 test = 'pkg/contracts/test'
 out = 'pkg/contracts/out'
 libs = ['lib']
+optimizer = true
+optimizer_runs = 10_000
 
 # See more config options https://github.com/foundry-rs/foundry/tree/master/config

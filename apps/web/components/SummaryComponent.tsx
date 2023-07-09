@@ -7,7 +7,7 @@ import {
     AccordionPanel,
     AccordionIcon,
 } from '@chakra-ui/react'
-import { store } from "~/stores/store";
+import { store } from "../stores/store";
 import {
     Table,
     Thead,
@@ -29,7 +29,7 @@ export default function SummaryComponent() {
 
 
     // Open window with Aragon
-    const openInNewTab = (url) => {
+    const openInNewTab = (url: string) => {
         window.open(url, "_blank", "noreferrer");
       };
 
@@ -108,13 +108,13 @@ export default function SummaryComponent() {
             store.appStatusStore.domain,
             addresses,
             balances,
-            [(BigInt(1e16) * BigInt(store.appStatusStore.support)).toString(),
-            (BigInt(1e16) * BigInt(store.appStatusStore.minApproval)).toString(),
+            [(BigInt(1e16) * BigInt(store.appStatusStore.support!)).toString(),
+            (BigInt(1e16) * BigInt(store.appStatusStore.minApproval!)).toString(),
             Number(store.appStatusStore.days) * 24 * 60 * 60 + Number(store.appStatusStore.hours) * 60 * 60 + Number(store.appStatusStore.minutes) * 60],
-            [(BigInt(1e16) * BigInt(store.appStatusStore.entryTribute)).toString(),
-            (BigInt(1e16) * BigInt(store.appStatusStore.exitTribute)).toString()],
+            [(BigInt(1e16) * BigInt(store.appStatusStore.entryTribute!)).toString(),
+            (BigInt(1e16) * BigInt(store.appStatusStore.exitTribute!)).toString()],
             store.appStatusStore.collateralToken?.address,
-            store.appStatusStore.reserveRatio * 10000,
+            store.appStatusStore.reserveRatio! * 10000,
             0
         ]
     })
@@ -137,7 +137,7 @@ export default function SummaryComponent() {
     useEffect(() => {
         if (data?.hash) {
             setIsSending(false);
-            const provider = new ethers.providers.JsonRpcProvider(process.env.NEXT_PUBLIC_INFURA_URL);
+            const provider = new ethers.providers.JsonRpcProvider("https://rpc.gnosischain.com/");
             const interval = setInterval(async () => {
                 const receipt = await provider.getTransactionReceipt(data.hash);
                 if (receipt && receipt.blockNumber) {

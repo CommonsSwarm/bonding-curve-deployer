@@ -1,6 +1,6 @@
 import { Box, Flex, Text, Button, Link } from "@chakra-ui/react";
 import { useRouter } from "next/router";
-import { Account } from "~/components";
+import { Account } from "../components";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 

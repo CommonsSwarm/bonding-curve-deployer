@@ -1,6 +1,6 @@
-import TokenHoldersComponent from "~/components/TokenHolderComponent";
+import TokenHoldersComponent from "../components/TokenHolderComponent";
 import { Box, Center, Text } from "@chakra-ui/react";
-import HeaderComponent from "~/components/Header";
+import HeaderComponent from "../components/Header";
 
 export default function TokenPage() {
     return (

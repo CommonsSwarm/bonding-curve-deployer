@@ -6,21 +6,21 @@ import {
 } from '@chakra-ui/react'
 import { CloseIcon } from "@chakra-ui/icons";
 import { useRouter } from "next/router";
-import { store } from "~/stores/store";
+import { store } from "../stores/store";
 
 export default function TokenHoldersComponent() {
 
     const [tokenName, setTokenName] = useState(store.appStatusStore.tokenName)
     const [tokenSymbol, setTokenSymbol] = useState(store.appStatusStore.tokenSymbol)
-    const [tokenHolders, setTokenHolders] = useState(store.appStatusStore.tokenHolders)
+    const [tokenHolders, setTokenHolders] = useState(store.appStatusStore.tokenHolders ?? [])
 
     const router = useRouter()
 
-    function handleTokenNameChange(event) {
+    function handleTokenNameChange(event: any) {
         setTokenName(event.target.value)
     }
 
-    function handleTokenSymbolChange(event) {
+    function handleTokenSymbolChange(event: any) {
         setTokenSymbol(event.target.value)
     }
 
@@ -28,13 +28,13 @@ export default function TokenHoldersComponent() {
         setTokenHolders([...tokenHolders, { address: '', balance: '' }])
     }
 
-    function handleHolderChange(i, event) {
+    function handleHolderChange(i: number, event: any, field: boolean) {
         const values = [...tokenHolders];
-        values[i][event.target.name] = event.target.value;
+        values[i][field ? 'address' : 'balance'] = event.target.value;
         setTokenHolders(values);
     }
 
-    function handleRemoveHolder(i) {
+    function handleRemoveHolder(i: number) {
         const values = [...tokenHolders];
         if (values.length === 1) {
             values[i] = { address: '', balance: '' };
@@ -65,11 +65,11 @@ export default function TokenHoldersComponent() {
                 <HStack width="90%">
                     <FormControl width="70%">
                         <FormLabel>Token name</FormLabel>
-                        <Input placeholder="My Organization Token" value={tokenName} onChange={handleTokenNameChange} />
+                        <Input placeholder="My Organization Token" value={tokenName ?? ''} onChange={handleTokenNameChange} />
                     </FormControl>
                     <FormControl width="30%">
                         <FormLabel>Token symbol</FormLabel>
-                        <Input placeholder="MOT" value={tokenSymbol} onChange={handleTokenSymbolChange} />
+                        <Input placeholder="MOT" value={tokenSymbol?? ''} onChange={handleTokenSymbolChange} />
                     </FormControl>
                 </HStack>
 
@@ -78,7 +78,7 @@ export default function TokenHoldersComponent() {
                         <FormLabel>Token holders</FormLabel>
                         {tokenHolders.map((holder, i) => (
                             <InputGroup key={i} p=".25rem">
-                                <Input name="address" placeholder="Account address" value={holder.address} onChange={event => handleHolderChange(i, event)} />
+                                <Input name="address" placeholder="Account address" value={holder.address ?? ''} onChange={event => handleHolderChange(i, event, true)} />
                                 <InputRightAddon>
                                     <IconButton aria-label="Delete" icon={<CloseIcon />} onClick={() => handleRemoveHolder(i)} />
                                 </InputRightAddon>
@@ -90,7 +90,7 @@ export default function TokenHoldersComponent() {
                         <FormLabel>Balances</FormLabel>
                         {tokenHolders.map((holder, i) => (
                             <InputGroup p=".25rem">
-                                <Input key={i} name="balance" value={holder.balance} onChange={event => handleHolderChange(i, event)} type="number" />
+                                <Input key={i} name="balance" value={holder.balance ?? ''} onChange={event => handleHolderChange(i, event, false)} type="number" />
                             </InputGroup>
 
                         ))}

@@ -1,6 +1,6 @@
 import { Box, Button, InputGroup, Input, InputRightAddon, Flex, Text, Alert, VStack, AlertIcon, HStack } from "@chakra-ui/react";
 import { useState } from 'react'
-import { store } from "~/stores/store";
+import { store } from "../stores/store";
 import { useRouter } from "next/router";
 
 export default function DomainFormComponent() {
@@ -9,7 +9,7 @@ export default function DomainFormComponent() {
 
     const router = useRouter()
 
-    function handleDomainChange(event) {
+    function handleDomainChange(event: any) {
         setDomain(event.target.value)
     }
 
@@ -30,7 +30,7 @@ export default function DomainFormComponent() {
                 <VStack spacing={4}>
                     <Text fontSize="xl" as="b" p="1rem" textAlign="center">Claim a name</Text>
                     <InputGroup>
-                        <Input placeholder="Type an organization name" value={domain} onChange={handleDomainChange} />
+                        <Input placeholder="Type an organization name" value={domain ?? ''} onChange={handleDomainChange} />
                         <InputRightAddon children='.aragonid.eth' />
                     </InputGroup>
                     <Alert status="info" p="1rem">

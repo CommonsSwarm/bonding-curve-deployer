@@ -6,7 +6,7 @@ import {
 } from '@chakra-ui/react'
 import { CloseIcon } from "@chakra-ui/icons";
 import { useRouter } from "next/router";
-import { store } from "~/stores/store";
+import { store } from "../stores/store";
 
 export default function AugmentedBondingCurveComponent() {
 
@@ -26,25 +26,25 @@ export default function AugmentedBondingCurveComponent() {
     ];
 
 
-    function handleReserveRatioChange(event) {
+    function handleReserveRatioChange(event: any) {
         setReserveRatio(event.target.value)
     }
 
-    const handleCollateralTokenChange = (event) => {
+    const handleCollateralTokenChange = (event: any) => {
         const selectedToken = collateralTokenList.find((token) => token.symbol === event.target.value);
         setColateralToken(selectedToken || { address: null, symbol: null });
       };
       
 
-    function handleInitialReserveChange(event) {
+    function handleInitialReserveChange(event: any) {
         setInitialReserve(event.target.value)
     }
 
-    function handleEntryTributeChange(event) {
+    function handleEntryTributeChange(event: any) {
         setEntryTribute(event.target.value)
     }
 
-    function handleExitTributeChange(event) {
+    function handleExitTributeChange(event: any) {
         setExitTribute(event.target.value)
     }
 
@@ -71,13 +71,13 @@ export default function AugmentedBondingCurveComponent() {
                     <FormControl>
                         <FormLabel>Reserve ratio</FormLabel>
                         <InputGroup>
-                            <Input value={reserveRatio} onChange={handleReserveRatioChange} type="number" />
+                            <Input value={reserveRatio || 0} onChange={handleReserveRatioChange} type="number" />
                             <InputRightAddon children="%" />
                         </InputGroup>
                     </FormControl>
                     <FormControl>
                         <FormLabel>Colateral token</FormLabel>
-                        <Select placeholder="Select token" value={colateralToken?.symbol} onChange={handleCollateralTokenChange}>
+                        <Select placeholder="Select token" value={colateralToken?.symbol || ''} onChange={handleCollateralTokenChange}>
                             {collateralTokenList.map((token) => (
                                 <option key={token.address} value={token.symbol}>
                                     {token.symbol}
@@ -88,7 +88,7 @@ export default function AugmentedBondingCurveComponent() {
                     <FormControl>
                         <FormLabel>Initial reserve token</FormLabel>
                         <InputGroup>
-                            <Input value={initialReserve} onChange={handleInitialReserveChange} type="number" />
+                            <Input value={initialReserve ?? 0} onChange={handleInitialReserveChange} type="number" />
                             <InputRightAddon children={colateralToken?.symbol} />
                         </InputGroup>
                     </FormControl>
@@ -96,14 +96,14 @@ export default function AugmentedBondingCurveComponent() {
                         <FormControl>
                             <FormLabel>Entry tribute</FormLabel>
                             <InputGroup>
-                                <Input value={entryTribute} onChange={handleEntryTributeChange} type="number" />
+                                <Input value={entryTribute ?? 0} onChange={handleEntryTributeChange} type="number" />
                                 <InputRightAddon children="%" />
                             </InputGroup>
                         </FormControl>
                         <FormControl>
                             <FormLabel>Exit tribute</FormLabel>
                             <InputGroup>
-                                <Input value={exitTribute} onChange={handleExitTributeChange} type="number" />
+                                <Input value={exitTribute ?? 0} onChange={handleExitTributeChange} type="number" />
                                 <InputRightAddon children="%" />
                             </InputGroup>
                         </FormControl>

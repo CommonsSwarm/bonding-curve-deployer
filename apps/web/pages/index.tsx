@@ -1,9 +1,9 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount } from "wagmi";
 import { Box, Button, Center, InputGroup, Input, InputRightAddon, VStack, Text, Alert, AlertIcon, HStack, Slider, SliderTrack, SliderFilledTrack, SliderThumb } from "@chakra-ui/react";
-import { Account } from "~/components";
+import { Account } from "../components";
 import { useRouter } from "next/router";
-import HeaderComponent from "~/components/Header";
+import HeaderComponent from "../components/Header";
 
 
 function Page() {

@@ -5,7 +5,7 @@ import NextHead from "next/head";
 import * as React from "react";
 import { WagmiConfig } from "wagmi";
 import { ChakraProvider } from "@chakra-ui/react"
-import { store, StoreContext } from "~/stores/store";
+import { store, StoreContext } from "../stores/store";
 
 
 
@@ -20,7 +20,7 @@ function App({ Component, pageProps }: AppProps) {
         <StoreContext.Provider value={store}>
           <RainbowKitProvider chains={chains}>
             <NextHead>
-              <title>My App</title>
+              <title>ABC Deployer</title>
             </NextHead>
 
             {mounted && <Component {...pageProps} />}
