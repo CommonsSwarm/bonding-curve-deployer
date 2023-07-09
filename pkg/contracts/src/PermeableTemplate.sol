@@ -1,6 +1,7 @@
 pragma solidity 0.6.2;
 
 import "./BaseTemplate.sol";
+import "./utils/SafeERC20.sol";
 
 interface AugmentedBondingCurve {
     function initialize(
@@ -22,6 +23,8 @@ interface AugmentedBondingCurve {
 }
 
 contract PermeableTemplate is BaseTemplate, TokenCache {
+    using SafeERC20 for IERC20;
+
     string private constant ERROR_EMPTY_HOLDERS = "PERMEABLE_EMPTY_HOLDERS";
     string private constant ERROR_BAD_HOLDERS_STAKES_LEN = "PERMEABLE_BAD_HOLDERS_STAKES_LEN";
     string private constant ERROR_BAD_VOTE_SETTINGS = "PERMEABLE_BAD_VOTE_SETTINGS";
@@ -69,10 +72,11 @@ contract PermeableTemplate is BaseTemplate, TokenCache {
         uint64[3] calldata _votingSettings,
         uint256[2] calldata _fees, //0: buy, 1: sell
         address _collateralToken,
-        uint32 _reserveRatio
+        uint32 _reserveRatio,
+        uint256 _initialBalance
     ) external {
         newToken(_tokenName, _tokenSymbol);
-        newInstance(_id, _holders, _stakes, _votingSettings, _fees, _collateralToken, _reserveRatio);
+        newInstance(_id, _holders, _stakes, _votingSettings, _fees, _collateralToken, _reserveRatio, _initialBalance);
     }
 
     /**
@@ -100,17 +104,21 @@ contract PermeableTemplate is BaseTemplate, TokenCache {
         uint64[3] memory _votingSettings,
         uint256[2] memory _fees, //0: buy, 1: sell
         address _collateralToken,
-        uint32 _reserveRatio
-    ) public {
+        uint32 _reserveRatio,
+        uint256 _initialBalance
+    ) public returns (address) {
         _validateId(_id);
         _ensureSettings(_holders, _stakes, _votingSettings);
 
         (Kernel dao, ACL acl) = _createDAO();
-        (Finance finance, Voting voting) =
-            _setupApps(dao, acl, _holders, _stakes, _votingSettings, _fees, _collateralToken, _reserveRatio);
+        (Finance finance, Voting voting) = _setupApps(
+            dao, acl, _holders, _stakes, _votingSettings, _fees, _collateralToken, _reserveRatio, _initialBalance
+        );
         _transferCreatePaymentManagerFromTemplate(acl, finance, address(voting));
         _transferRootPermissionsFromTemplateAndFinalizeDAO(dao, address(voting));
         _registerID(_id, address(dao));
+
+        return (address(dao));
     }
 
     function _setupApps(
@@ -121,7 +129,8 @@ contract PermeableTemplate is BaseTemplate, TokenCache {
         uint64[3] memory _votingSettings,
         uint256[2] memory _fees, //0: buy, 1: sell
         address _collateralToken,
-        uint32 _reserveRatio
+        uint32 _reserveRatio,
+        uint256 _initialBalance
     ) internal returns (Finance, Voting) {
         // 0: token, 1: agent, 2: finance, 3: token manager, 4: voting
         address[] memory apps = new address[](5);
@@ -136,7 +145,9 @@ contract PermeableTemplate is BaseTemplate, TokenCache {
         _mintTokens(_acl, TokenManager(apps[3]), _holders, _stakes);
         _setupPermissions(_acl, Vault(apps[1]), Voting(apps[4]), Finance(apps[2]), TokenManager(apps[3]));
 
-        _setupPermeableApps(_dao, _acl, TokenManager(apps[3]), apps[1], _fees, _collateralToken, _reserveRatio, apps[4]);
+        _setupPermeableApps(
+            _dao, _acl, TokenManager(apps[3]), apps[1], _fees, _collateralToken, _reserveRatio, apps[4], _initialBalance
+        );
         _transferTokenManagerFromTemplate(_acl, TokenManager(apps[3]), apps[4]);
 
         return (Finance(apps[2]), Voting(apps[4]));
@@ -166,19 +177,32 @@ contract PermeableTemplate is BaseTemplate, TokenCache {
         uint256[2] memory _fees, //0: buy, 1: sell
         address _collateralToken,
         uint32 _reserveRatio,
-        address _vaultManager
+        address _vaultManager,
+        uint256 _initialBalance
     ) internal {
         // install new permeable vault
         Vault _permeableVault = _installVaultApp(_dao);
 
         address _formula = 0xA4e28453b4F3fcB251EEbe1aC2798eEE55e2bE6a;
-
         AugmentedBondingCurve _augmentedBondingCurve =
             _installAugmentedBondingCurve(_dao, _tokenManager, _formula, _permeableVault, _beneficiary, _fees);
         _configureAugmentedBondingCurve(_augmentedBondingCurve, _acl, _collateralToken, _reserveRatio);
 
         // last thing to do
         _setupPermeablePermissions(_acl, _tokenManager, _permeableVault, _augmentedBondingCurve, _vaultManager);
+    }
+
+    function _receiveAmount(Vault _vault, uint256 _amount, address _collateralToken) internal {
+        if (_amount == 0) {
+            return;
+        }
+        if (_collateralToken == address(0)) {
+            revert("ERROR_NATIVE_TOKEN_NOT_ACCEPTED");
+        } else {
+            require(
+                IERC20(_collateralToken).transferFrom(msg.sender, address(_vault), _amount), "ERROR_TRANSFER_FAILED"
+            );
+        }
     }
 
     function _setupPermeablePermissions(

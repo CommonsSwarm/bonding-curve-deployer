@@ -19,6 +19,7 @@ contract PermeableTemplateScript is Script {
         uint32 _reserveRatio = 20e4; // 20%
         uint256 _buyFeePct = 10;
         uint256 _sellFeePct = 20;
+        uint256 _initialAmount = 1e18;
 
         PermeableTemplate t = new PermeableTemplate(daoFactory, ens, miniMeFactory, aragonID);
 
@@ -28,6 +29,8 @@ contract PermeableTemplateScript is Script {
         uint256[] memory stakes = new uint256[](1);
         stakes[0] = 100e18;
 
+        IERC20(_collateralToken).approve(address(t), _initialAmount);
+
         t.newToken("Governance Token", "GOV");
         t.newInstance(
             "permeable",
@@ -36,7 +39,8 @@ contract PermeableTemplateScript is Script {
             [uint64(50e16), uint64(5e16), uint64(7 days)],
             [uint256(_buyFeePct), uint256(_sellFeePct)],
             _collateralToken,
-            _reserveRatio
+            _reserveRatio,
+            _initialAmount
         );
 
         vm.stopBroadcast();
