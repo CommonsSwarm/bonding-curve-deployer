@@ -1,4 +1,4 @@
-import DomainFormComponent from "~/components/DomainForm"
+import DomainFormComponent from "~/components/DomainFormComponent"
 import { Box, Center, Text } from "@chakra-ui/react";
 
 
