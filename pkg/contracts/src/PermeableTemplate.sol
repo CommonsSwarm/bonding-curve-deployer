@@ -14,6 +14,8 @@ interface AugmentedBondingCurve {
     ) external;
 
     function MANAGE_COLLATERAL_TOKEN_ROLE() external returns (bytes32);
+    function MAKE_BUY_ORDER_ROLE() external returns (bytes32);
+    function MAKE_SELL_ORDER_ROLE() external returns (bytes32);
     function addCollateralToken(
         address _collateral,
         uint256 _virtualSupply,
@@ -36,6 +38,8 @@ contract PermeableTemplate is BaseTemplate, TokenCache {
 
     uint256 private constant VIRTUAL_SUPPLY = uint256(0);
     uint256 private constant VIRTUAL_BALANCE = uint256(0);
+
+    address private constant ANY_ENTITY = address(-1);
 
     bytes32 internal constant ABC_APP_ID = 0x952fcbadf8d7288f1a8b47ed7ee931702318b527558093398674db0c93e3a75b;
 
@@ -177,7 +181,7 @@ contract PermeableTemplate is BaseTemplate, TokenCache {
         uint256[2] memory _fees, //0: buy, 1: sell
         address _collateralToken,
         uint32 _reserveRatio,
-        address _vaultManager,
+        address _manager,
         uint256 _initialBalance
     ) internal {
         // install new permeable vault
@@ -189,7 +193,7 @@ contract PermeableTemplate is BaseTemplate, TokenCache {
         _configureAugmentedBondingCurve(_augmentedBondingCurve, _acl, _collateralToken, _reserveRatio);
 
         // last thing to do
-        _setupPermeablePermissions(_acl, _tokenManager, _permeableVault, _augmentedBondingCurve, _vaultManager);
+        _setupPermeablePermissions(_acl, _tokenManager, _permeableVault, _augmentedBondingCurve, _manager);
     }
 
     function _receiveAmount(Vault _vault, uint256 _amount, address _collateralToken) internal {
@@ -210,10 +214,11 @@ contract PermeableTemplate is BaseTemplate, TokenCache {
         TokenManager _tokenManager,
         Vault _permeableVault,
         AugmentedBondingCurve _augmentedBondingCurve,
-        address _vaultManager
+        address _manager
     ) internal {
-        _createVaultPermissions(_acl, _permeableVault, address(_augmentedBondingCurve), _vaultManager);
+        _createVaultPermissions(_acl, _permeableVault, address(_augmentedBondingCurve), _manager);
         _grantTokenManagerPermissions(_acl, _tokenManager, address(_augmentedBondingCurve));
+        _createAugmentedBondingCurvesPermissions(_acl, _augmentedBondingCurve, _manager);
     }
 
     function _transferTokenManagerFromTemplate(ACL _acl, TokenManager _tokenManager, address _manager) internal {
@@ -269,6 +274,19 @@ contract PermeableTemplate is BaseTemplate, TokenCache {
         );
         _acl.removePermissionManager(
             address(_augmentedBondingCurve), _augmentedBondingCurve.MANAGE_COLLATERAL_TOKEN_ROLE()
+        );
+    }
+
+    function _createAugmentedBondingCurvesPermissions(
+        ACL _acl,
+        AugmentedBondingCurve _augmentedBondingCurve,
+        address _manager
+    ) internal {
+        _acl.createPermission(
+            ANY_ENTITY, address(_augmentedBondingCurve), _augmentedBondingCurve.MAKE_BUY_ORDER_ROLE(), _manager
+        );
+        _acl.createPermission(
+            ANY_ENTITY, address(_augmentedBondingCurve), _augmentedBondingCurve.MAKE_SELL_ORDER_ROLE(), _manager
         );
     }
 
