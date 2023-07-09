@@ -19,14 +19,13 @@ import {
     TableCaption,
     TableContainer,
 } from '@chakra-ui/react'
-import { ethers } from "ethers";
 
 export default function SummaryComponent() {
 
     const router = useRouter()
 
-    function launchDao() {
-
+    function handleSubmitButton() {
+        router.push('create-dao')
     }
 
     function handleBackButton() {
@@ -130,7 +129,7 @@ export default function SummaryComponent() {
                 </Accordion>
                 <HStack>
                     <Button alignSelf="flex-start" onClick={handleBackButton}>Back</Button>
-                    <Button alignSelf="flex-end" onClick={launchDao}>Launch</Button>
+                    <Button alignSelf="flex-end" onClick={handleSubmitButton}>Launch</Button>
                 </HStack>
             </VStack>
         </Box>
