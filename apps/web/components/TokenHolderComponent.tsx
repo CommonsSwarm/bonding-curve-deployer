@@ -61,8 +61,8 @@ export default function TokenHoldersComponent() {
             <VStack spacing={4}>
                 <Text fontSize="2xl" as="b" p="1rem" textAlign="center">Configure template</Text>
                 <Text fontSize="xl" as="b" p="1rem" textAlign="center">Choose your token settings below</Text>
-
-                <HStack>
+                
+                <HStack width="90%">
                     <FormControl width="70%">
                         <FormLabel>Token name</FormLabel>
                         <Input placeholder="My Organization Token" value={tokenName} onChange={handleTokenNameChange} />
@@ -73,7 +73,7 @@ export default function TokenHoldersComponent() {
                     </FormControl>
                 </HStack>
 
-                <HStack>
+                <HStack width="90%">
                     <FormControl width="70%">
                         <FormLabel>Token holders</FormLabel>
                         {tokenHolders.map((holder, i) => (
@@ -99,8 +99,8 @@ export default function TokenHoldersComponent() {
 
                 <Button onClick={handleAddHolder}>Add holder</Button>
                 <HStack>
-                    <Button alignSelf="flex-start" onClick={handleBackButton}>Back</Button>
-                    <Button alignSelf="flex-end" onClick={handleSubmitButton}>Next</Button>
+                    <Button alignSelf="flex-start" onClick={handleBackButton} colorScheme="blue">Back</Button>
+                    <Button alignSelf="flex-end" onClick={handleSubmitButton} colorScheme="blue">Next</Button>
                 </HStack>
             </VStack>
         </Box>

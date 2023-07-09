@@ -111,8 +111,8 @@ export default function AugmentedBondingCurveComponent() {
                 </VStack>
 
                 <HStack>
-                    <Button alignSelf="flex-start" onClick={handleBackButton}>Back</Button>
-                    <Button alignSelf="flex-end" onClick={handleSubmitButton}>Next</Button>
+                    <Button alignSelf="flex-start" onClick={handleBackButton} colorScheme="blue">Back</Button>
+                    <Button alignSelf="flex-end" onClick={handleSubmitButton} colorScheme="blue">Next</Button>
                 </HStack>
             </VStack>
         </Box>

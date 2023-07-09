@@ -42,7 +42,7 @@ export default function DomainFormComponent() {
                     
                     <HStack>
                     <Button alignSelf="flex-start" onClick={handleBackButton}>Back</Button>
-                    <Button alignSelf="flex-end" isDisabled={domain?.trim() === ""} onClick={handleSubmitButton}>Next</Button>
+                    <Button alignSelf="flex-end" isDisabled={domain?.trim() === ""} onClick={handleSubmitButton} colorScheme="blue">Next</Button>
                     </HStack>
                 </VStack>
             </Box>

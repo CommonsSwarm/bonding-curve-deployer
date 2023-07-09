@@ -268,8 +268,8 @@ export default function SummaryComponent() {
                             </AccordionItem>
                         </Accordion>
                         <HStack>
-                            <Button alignSelf="flex-start" onClick={handleBackButton}>Back</Button>
-                            <Button alignSelf="flex-end" onClick={handleLaunch}>Launch</Button>
+                            <Button alignSelf="flex-start" onClick={handleBackButton} colorScheme="blue">Back</Button>
+                            <Button alignSelf="flex-end" onClick={handleLaunch} colorScheme="red">Launch</Button>
                         </HStack>
                     </VStack>
                 </Box>

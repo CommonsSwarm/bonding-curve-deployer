@@ -3,11 +3,10 @@ import { useAccount } from "wagmi";
 import { Box, Button, Center, InputGroup, Input, InputRightAddon, VStack, Text, Alert, AlertIcon, HStack, Slider, SliderTrack, SliderFilledTrack, SliderThumb } from "@chakra-ui/react";
 import { Account } from "~/components";
 import { useRouter } from "next/router";
-
+import HeaderComponent from "~/components/Header";
 
 
 function Page() {
-  const { isConnected } = useAccount();
 
   const router = useRouter()
 
@@ -15,35 +14,23 @@ function Page() {
     router.push('/domain')
   }
 
-  if(isConnected) {
     return (
       <>
       <main>
-        <Center height="100vh" width="100vw">
+        <HeaderComponent/>
+        <Center height="80vh" width="100vw">
           <Box borderWidth="1px" borderRadius="lg" padding="6" boxShadow="lg" width="50vw">
-            <h1>wagmi + RainbowKit + Next.js</h1>
+            <VStack spacing={4}>
+            <Text fontSize="2xl">Welcome to ABC Deployer!</Text>
+            <Text fontSize="xl">Connect your wallet to start creating your DAO with Augmented Bonding Curve</Text>
             <ConnectButton/>
             <Button onClick={handleStartButton}>Start!</Button>
+            </VStack>
           </Box >
         </Center>
       </main>
     </>
     )
   }
-  return (
-    <>
-      <main>
-        <Center height="100vh" width="100vw">
-          <Box borderWidth="1px" borderRadius="lg" padding="6" boxShadow="lg" width="50vw">
-            <h1>wagmi + RainbowKit + Next.js</h1>
-
-            <ConnectButton />
-            {isConnected && <Account /> }
-          </Box >
-        </Center>
-      </main>
-    </>
-  );
-}
 
 export default Page;

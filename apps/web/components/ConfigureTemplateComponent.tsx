@@ -143,8 +143,8 @@ export default function ConfigureTemplateComponent() {
                     <Text fontSize="xs" as="em">The support and minimum approval thresholds are strict requirements, such that votes will only pass if they achieve approval percentages greater than these thresholds.</Text>
                 </Alert>
                 <HStack>
-                    <Button alignSelf="flex-start" onClick={handleBackButton}>Back</Button>
-                    <Button alignSelf="flex-end" onClick={handleSubmitButton}>Next</Button>
+                    <Button alignSelf="flex-start" onClick={handleBackButton} colorScheme="blue">Back</Button>
+                    <Button alignSelf="flex-end" onClick={handleSubmitButton} colorScheme="blue">Next</Button>
                 </HStack>
 
             </VStack>
