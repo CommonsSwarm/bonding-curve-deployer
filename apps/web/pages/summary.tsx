@@ -1,5 +1,5 @@
 import { Box, Center, Text } from "@chakra-ui/react";
-import HeaderComponent from "../components/Header";
+import HeaderComponent from "../components/HeaderComponent";
 import SummaryComponent from "../components/SummaryComponent";
 
 export default function SummaryPage() {

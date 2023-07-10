@@ -1,23 +1,18 @@
-import { Box, Button, InputGroup, Select, Input, InputRightAddon, Flex, Text, Alert, VStack, AlertIcon, HStack, IconButton, Stack } from "@chakra-ui/react";
+import { Box, Button, InputGroup, Select, Input, InputRightAddon, Text, VStack, HStack, FormControl, FormLabel} from "@chakra-ui/react";
 import { useState } from 'react'
-import {
-    FormControl,
-    FormLabel,
-} from '@chakra-ui/react'
-import { CloseIcon } from "@chakra-ui/icons";
 import { useRouter } from "next/router";
 import { store } from "../stores/store";
 
 export default function AugmentedBondingCurveComponent() {
 
+    // Handle user input variables
     const [reserveRatio, setReserveRatio] = useState(store.appStatusStore.reserveRatio)
     const [colateralToken, setColateralToken] = useState(store.appStatusStore.collateralToken)
     const [initialReserve, setInitialReserve] = useState(store.appStatusStore.reserveRatio)
     const [entryTribute, setEntryTribute] = useState(store.appStatusStore.entryTribute)
     const [exitTribute, setExitTribute] = useState(store.appStatusStore.exitTribute)
 
-    const router = useRouter()
-
+    // Token addresses. Store in a more secure way in the future?
     const collateralTokenList = [
         { address: "0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d", symbol: "WXDAI" },
         { address: "0xDDAfbb505ad214D7b80b1f830fcCc89B60fb7A83", symbol: "USDC" },
@@ -25,40 +20,22 @@ export default function AugmentedBondingCurveComponent() {
         { address: "0x4f4F9b8D5B4d0Dc10506e5551B0513B61fD59e75", symbol: "GIV" },
     ];
 
-
-    function handleReserveRatioChange(event: any) {
-        setReserveRatio(event.target.value)
-    }
-
+    // Handle token selection
     const handleCollateralTokenChange = (event: any) => {
         const selectedToken = collateralTokenList.find((token) => token.symbol === event.target.value);
         setColateralToken(selectedToken || { address: null, symbol: null });
-      };
-      
-
-    function handleInitialReserveChange(event: any) {
-        setInitialReserve(event.target.value)
-    }
-
-    function handleEntryTributeChange(event: any) {
-        setEntryTribute(event.target.value)
-    }
-
-    function handleExitTributeChange(event: any) {
-        setExitTribute(event.target.value)
-    }
-
-    function handleSubmitButton() {
+    };
+    
+    // Handle page routing & storage of user input variables
+    const router = useRouter()
+    
+    function handleNextButton() {
         store.appStatusStore.reserveRatio = reserveRatio
         store.appStatusStore.collateralToken = colateralToken
         store.appStatusStore.initialReserve = initialReserve
         store.appStatusStore.entryTribute = entryTribute
         store.appStatusStore.exitTribute = exitTribute
         router.push('/summary')
-    }
-
-    function handleBackButton() {
-        router.push('/token')
     }
 
     return (
@@ -71,7 +48,7 @@ export default function AugmentedBondingCurveComponent() {
                     <FormControl>
                         <FormLabel>Reserve ratio</FormLabel>
                         <InputGroup>
-                            <Input value={reserveRatio || 0} onChange={handleReserveRatioChange} type="number" />
+                            <Input value={reserveRatio || 0} onChange={(e) => setReserveRatio(Number(e.target.value))} type="number" />
                             <InputRightAddon children="%" />
                         </InputGroup>
                     </FormControl>
@@ -88,7 +65,7 @@ export default function AugmentedBondingCurveComponent() {
                     <FormControl>
                         <FormLabel>Initial reserve token</FormLabel>
                         <InputGroup>
-                            <Input value={initialReserve ?? 0} onChange={handleInitialReserveChange} type="number" />
+                            <Input value={initialReserve ?? 0} onChange={(e) => setInitialReserve(Number(e.target.value))} type="number" />
                             <InputRightAddon children={colateralToken?.symbol} />
                         </InputGroup>
                     </FormControl>
@@ -96,14 +73,14 @@ export default function AugmentedBondingCurveComponent() {
                         <FormControl>
                             <FormLabel>Entry tribute</FormLabel>
                             <InputGroup>
-                                <Input value={entryTribute ?? 0} onChange={handleEntryTributeChange} type="number" />
+                                <Input value={entryTribute ?? 0} onChange={(e) => setEntryTribute(Number(e.target.value))} type="number" />
                                 <InputRightAddon children="%" />
                             </InputGroup>
                         </FormControl>
                         <FormControl>
                             <FormLabel>Exit tribute</FormLabel>
                             <InputGroup>
-                                <Input value={exitTribute ?? 0} onChange={handleExitTributeChange} type="number" />
+                                <Input value={exitTribute ?? 0} onChange={(e) => setExitTribute(Number(e.target.value))} type="number" />
                                 <InputRightAddon children="%" />
                             </InputGroup>
                         </FormControl>
@@ -111,8 +88,8 @@ export default function AugmentedBondingCurveComponent() {
                 </VStack>
 
                 <HStack>
-                    <Button alignSelf="flex-start" onClick={handleBackButton} colorScheme="blue">Back</Button>
-                    <Button alignSelf="flex-end" onClick={handleSubmitButton} colorScheme="blue">Next</Button>
+                    <Button alignSelf="flex-start" onClick={() => router.push('/token')} colorScheme="blue">Back</Button>
+                    <Button alignSelf="flex-end" isDisabled={!reserveRatio || !colateralToken || !initialReserve || !entryTribute || !exitTribute} onClick={handleNextButton} colorScheme="blue">Next</Button>
                 </HStack>
             </VStack>
         </Box>

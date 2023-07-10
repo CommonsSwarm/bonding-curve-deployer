@@ -1,6 +1,6 @@
 import DomainFormComponent from "../components/DomainFormComponent"
-import { Box, Center, Text } from "@chakra-ui/react";
-import HeaderComponent from "../components/Header";
+import { Center } from "@chakra-ui/react";
+import HeaderComponent from "../components/HeaderComponent";
 
 export default function DomainPage() {
     return (

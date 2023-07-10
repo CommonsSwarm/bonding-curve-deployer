@@ -1,10 +1,10 @@
-import { Box, Flex, Text, Button, Link } from "@chakra-ui/react";
+import { Box, Flex, Text, } from "@chakra-ui/react";
 import { useRouter } from "next/router";
-import { Account } from "../components";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 
 export default function HeaderComponent() {
+    // Handle page routing
     const router = useRouter();
 
     return (

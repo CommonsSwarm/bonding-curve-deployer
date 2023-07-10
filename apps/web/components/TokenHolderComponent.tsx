@@ -1,39 +1,24 @@
-import { Box, Button, InputGroup, Input, InputRightAddon, Flex, Text, Alert, VStack, AlertIcon, HStack, IconButton, Stack } from "@chakra-ui/react";
+import { Box, Button, InputGroup, Input, InputRightAddon, Text, VStack, HStack, IconButton, FormControl, FormLabel } from "@chakra-ui/react";
 import { useState } from 'react'
-import {
-    FormControl,
-    FormLabel,
-} from '@chakra-ui/react'
 import { CloseIcon } from "@chakra-ui/icons";
 import { useRouter } from "next/router";
 import { store } from "../stores/store";
 
 export default function TokenHoldersComponent() {
 
+    // Handle user input variables
     const [tokenName, setTokenName] = useState(store.appStatusStore.tokenName)
     const [tokenSymbol, setTokenSymbol] = useState(store.appStatusStore.tokenSymbol)
     const [tokenHolders, setTokenHolders] = useState(store.appStatusStore.tokenHolders ?? [])
 
-    const router = useRouter()
-
-    function handleTokenNameChange(event: any) {
-        setTokenName(event.target.value)
-    }
-
-    function handleTokenSymbolChange(event: any) {
-        setTokenSymbol(event.target.value)
-    }
-
-    function handleAddHolder() {
-        setTokenHolders([...tokenHolders, { address: '', balance: '' }])
-    }
-
+    // Handle chanding holder details
     function handleHolderChange(i: number, event: any, field: boolean) {
         const values = [...tokenHolders];
         values[i][field ? 'address' : 'balance'] = event.target.value;
         setTokenHolders(values);
     }
 
+    // Handle removing holders
     function handleRemoveHolder(i: number) {
         const values = [...tokenHolders];
         if (values.length === 1) {
@@ -43,6 +28,8 @@ export default function TokenHoldersComponent() {
         }
         setTokenHolders(values);
     }
+    // Handle page routing & storage of user input variables
+    const router = useRouter()
 
     function handleSubmitButton() {
         store.appStatusStore.tokenName = tokenName
@@ -51,25 +38,21 @@ export default function TokenHoldersComponent() {
         router.push('/augmented-bonding-curve')
     }
 
-    function handleBackButton() {
-        router.push('/template')
-    }
-
     return (
         <Box borderWidth="1px" borderRadius="lg" padding="6" boxShadow="lg" width="50vw">
 
             <VStack spacing={4}>
                 <Text fontSize="2xl" as="b" p="1rem" textAlign="center">Configure template</Text>
                 <Text fontSize="xl" as="b" p="1rem" textAlign="center">Choose your token settings below</Text>
-                
+
                 <HStack width="90%">
                     <FormControl width="70%">
                         <FormLabel>Token name</FormLabel>
-                        <Input placeholder="My Organization Token" value={tokenName ?? ''} onChange={handleTokenNameChange} />
+                        <Input placeholder="My Organization Token" value={tokenName ?? ''} onChange={(e) => setTokenName(e.target.value)} />
                     </FormControl>
                     <FormControl width="30%">
                         <FormLabel>Token symbol</FormLabel>
-                        <Input placeholder="MOT" value={tokenSymbol?? ''} onChange={handleTokenSymbolChange} />
+                        <Input placeholder="MOT" value={tokenSymbol ?? ''} onChange={(e) => setTokenSymbol(e.target.value)} />
                     </FormControl>
                 </HStack>
 
@@ -97,10 +80,10 @@ export default function TokenHoldersComponent() {
                     </FormControl>
                 </HStack>
 
-                <Button onClick={handleAddHolder}>Add holder</Button>
+                <Button onClick={() => setTokenHolders([...tokenHolders, { address: '', balance: '' }])}>Add holder</Button>
                 <HStack>
-                    <Button alignSelf="flex-start" onClick={handleBackButton} colorScheme="blue">Back</Button>
-                    <Button alignSelf="flex-end" onClick={handleSubmitButton} colorScheme="blue">Next</Button>
+                    <Button alignSelf="flex-start" onClick={() => router.push('/template')} colorScheme="blue">Back</Button>
+                    <Button alignSelf="flex-end" isDisabled={!tokenName || !tokenSymbol || tokenHolders.length == 1 && tokenHolders[0].address == '' || tokenHolders[0].balance == ''} onClick={handleSubmitButton} colorScheme="blue">Next</Button>
                 </HStack>
             </VStack>
         </Box>

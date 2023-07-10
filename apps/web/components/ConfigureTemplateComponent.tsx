@@ -1,62 +1,21 @@
-import { Box, Button, InputGroup, Input, InputRightAddon, VStack, Text, Alert, AlertIcon, HStack, Slider, SliderTrack, SliderFilledTrack, SliderThumb } from "@chakra-ui/react";
+import { Box, Button, InputGroup, Input, InputRightAddon, VStack, Text, Alert, AlertIcon, HStack, Slider, SliderTrack, SliderFilledTrack, SliderThumb, FormControl, FormLabel } from "@chakra-ui/react";
 import { useState } from "react";
-import {
-    FormControl,
-    FormLabel,
-    FormErrorMessage,
-    FormHelperText,
-} from '@chakra-ui/react'
 import { useRouter } from "next/router";
 import { store } from "../stores/store";
 
 export default function ConfigureTemplateComponent() {
 
-    const router = useRouter()
-
+    // Handle user input variables
     const [support, setSupport] = useState(store.appStatusStore.support)
     const [minApproval, setMinApproval] = useState(store.appStatusStore.minApproval)
     const [days, setDays] = useState(store.appStatusStore.days)
     const [hours, setHours] = useState(store.appStatusStore.hours)
     const [minutes, setMinutes] = useState(store.appStatusStore.minutes)
 
-    // Sliders
-    function handleSupportChangeInput(event: any) {
-        const value = parseInt(event.target.value, 10);
-        if (!isNaN(value)) {
-            setSupport(value)
-        }
-    }
+    // Handle page routing & storage of user input variables
+    const router = useRouter()
 
-    function handleSupportChangeSlider(value: any) {
-        setSupport(value)
-    }
-
-    function handleApprovalChangeInput(event: any) {
-        const value = parseInt(event.target.value, 10);
-        if (!isNaN(value)) {
-            setMinApproval(value)
-        }
-    }
-
-    function handleApprovalChangeSlider(value: any) {
-        setMinApproval(value)
-    }
-
-    // Time
-    function handleDaysChange(event: any) {
-        setDays(event.target.value)
-    }
-
-    function handleHoursChange(event: any) {
-        setHours(event.target.value)
-    }
-
-    function handleMinutesChange(event: any) {
-        setMinutes(event.target.value)
-    }
-
-    // Buttons
-    function handleSubmitButton() {
+    function handleNextButton() {
         store.appStatusStore.support = support
         store.appStatusStore.minApproval = minApproval
         store.appStatusStore.days = days
@@ -65,13 +24,8 @@ export default function ConfigureTemplateComponent() {
         router.push('/token')
     }
 
-    function handleBackButton() {
-        router.push('/domain')
-    }
-
     return (
         <Box borderWidth="1px" borderRadius="lg" padding="6" boxShadow="lg" width="50vw">
-            
             <VStack spacing={4}>
                 <Text fontSize="2xl" as="b" p="1rem" textAlign="center">Configure template</Text>
                 <Text fontSize="xl" as="b" p="1rem" textAlign="center">Choose your voting settings below</Text>
@@ -84,7 +38,7 @@ export default function ConfigureTemplateComponent() {
                             min={0}
                             max={100}
                             value={support ?? 0}
-                            onChange={handleSupportChangeSlider}
+                            onChange={(e) => setSupport(e)}
                             flexGrow={1}
                         >
                             <SliderTrack>
@@ -93,7 +47,7 @@ export default function ConfigureTemplateComponent() {
                             <SliderThumb />
                         </Slider>
                         <InputGroup width="20%">
-                            <Input value={support ?? 0} onChange={handleSupportChangeInput} type="number" />
+                            <Input value={support ?? 0} onChange={(e) => setSupport(Number(e.target.value))} type="number" />
                             <InputRightAddon children="%" />
                         </InputGroup>
                     </HStack>
@@ -107,7 +61,7 @@ export default function ConfigureTemplateComponent() {
                             min={0}
                             max={100}
                             value={minApproval ?? 0}
-                            onChange={handleApprovalChangeSlider}
+                            onChange={(e) => setMinApproval(e)}
                             flexGrow={1}
                         >
                             <SliderTrack>
@@ -116,7 +70,7 @@ export default function ConfigureTemplateComponent() {
                             <SliderThumb />
                         </Slider>
                         <InputGroup width="20%">
-                            <Input value={minApproval ?? 0} onChange={handleApprovalChangeInput} type="number" />
+                            <Input value={minApproval ?? 0} onChange={(e) => setMinApproval(Number(e.target.value))} type="number" />
                             <InputRightAddon children="%" />
                         </InputGroup>
                     </HStack>
@@ -126,15 +80,15 @@ export default function ConfigureTemplateComponent() {
                 <Text fontSize="sm">Vote duration</Text>
                 <HStack>
                     <InputGroup>
-                        <Input value={days ?? 0} onChange={handleDaysChange} type="number" />
+                        <Input value={days ?? 0} onChange={(e) => setDays(Number(e.target.value))} type="number" />
                         <InputRightAddon children="Days" />
                     </InputGroup>
                     <InputGroup>
-                        <Input value={hours ?? 0} type="number" onChange={handleHoursChange} />
+                        <Input value={hours ?? 0} type="number" onChange={(e) => setHours(Number(e.target.value))} />
                         <InputRightAddon children="Hours" />
                     </InputGroup>
                     <InputGroup>
-                        <Input value={minutes ?? 0} type="number" onChange={handleMinutesChange} />
+                        <Input value={minutes ?? 0} type="number" onChange={(e) => setMinutes(Number(e.target.value))} />
                         <InputRightAddon children="Minutes" />
                     </InputGroup>
                 </HStack>
@@ -143,8 +97,8 @@ export default function ConfigureTemplateComponent() {
                     <Text fontSize="xs" as="em">The support and minimum approval thresholds are strict requirements, such that votes will only pass if they achieve approval percentages greater than these thresholds.</Text>
                 </Alert>
                 <HStack>
-                    <Button alignSelf="flex-start" onClick={handleBackButton} colorScheme="blue">Back</Button>
-                    <Button alignSelf="flex-end" onClick={handleSubmitButton} colorScheme="blue">Next</Button>
+                    <Button alignSelf="flex-start" onClick={() => router.push('/organization')} colorScheme="blue">Back</Button>
+                    <Button alignSelf="flex-end" onClick={handleNextButton} colorScheme="blue">Next</Button>
                 </HStack>
 
             </VStack>

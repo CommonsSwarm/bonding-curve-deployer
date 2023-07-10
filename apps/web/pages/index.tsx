@@ -1,36 +1,32 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount } from "wagmi";
-import { Box, Button, Center, InputGroup, Input, InputRightAddon, VStack, Text, Alert, AlertIcon, HStack, Slider, SliderTrack, SliderFilledTrack, SliderThumb } from "@chakra-ui/react";
-import { Account } from "../components";
+import { Box, Button, Center, VStack, Text } from "@chakra-ui/react";
 import { useRouter } from "next/router";
-import HeaderComponent from "../components/Header";
+import HeaderComponent from "../components/HeaderComponent";
 
+export default function IndexPage() {
 
-function Page() {
-
+  // Initialize useRouter
   const router = useRouter()
 
-  function handleStartButton() {
-    router.push('/domain')
-  }
+  // Verify if the user is connected to a wallet, to enable/disable start button)
+  const { address } = useAccount()
 
-    return (
-      <>
+  return (
+    <>
       <main>
-        <HeaderComponent/>
+        <HeaderComponent />
         <Center height="80vh" width="100vw">
           <Box borderWidth="1px" borderRadius="lg" padding="6" boxShadow="lg" width="50vw">
             <VStack spacing={4}>
-            <Text fontSize="2xl">Welcome to ABC Deployer!</Text>
-            <Text fontSize="xl">Connect your wallet to start creating your DAO with Augmented Bonding Curve</Text>
-            <ConnectButton/>
-            <Button onClick={handleStartButton}>Start!</Button>
+              <Text fontSize="2xl">Welcome to ABC Deployer!</Text>
+              <Text fontSize="xl">Connect your wallet to start creating your DAO with Augmented Bonding Curve</Text>
+              <ConnectButton />
+              <Button onClick={() => router.push('/organization')} isDisabled={!address}>Start!</Button>
             </VStack>
           </Box >
         </Center>
       </main>
     </>
-    )
-  }
-
-export default Page;
+  )
+}

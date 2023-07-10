@@ -1,5 +1,4 @@
-import { Box, Button, InputGroup, Spinner, Select, Input, InputRightAddon, Flex, Text, Alert, VStack, AlertIcon, HStack, IconButton, Stack } from "@chakra-ui/react";
-import { useRouter } from "next/router";
+import { Box, Button, Spinner, Text, HStack, Checkbox, VStack } from "@chakra-ui/react";
 import {
     Accordion,
     AccordionItem,
@@ -7,43 +6,37 @@ import {
     AccordionPanel,
     AccordionIcon,
 } from '@chakra-ui/react'
-import { store } from "../stores/store";
 import {
     Table,
     Thead,
     Tbody,
-    Tfoot,
     Tr,
     Th,
     Td,
-    TableCaption,
-    TableContainer,
 } from '@chakra-ui/react'
+import { store } from "../stores/store";
+import { useRouter } from "next/router";
 import { useEffect, useState } from 'react';
 import { ethers } from "ethers";
 
 
-import { usePrepareContractWrite, useContractWrite, useWaitForTransaction } from 'wagmi'
+import { usePrepareContractWrite, useContractWrite } from 'wagmi'
 
 export default function SummaryComponent() {
+    // Initialize useRouter
+    const router = useRouter()
 
-
-    // Open window with Aragon
-    const openInNewTab = (url: string) => {
-        window.open(url, "_blank", "noreferrer");
-      };
+    // Handle user confirmation of summary
+    const [validated, setValidated] = useState(false)
 
     // Process holder adresses and balances
     const addresses = store.appStatusStore?.tokenHolders?.map((holder) => holder.address);
     const balances = store.appStatusStore?.tokenHolders?.map((holder) => {
         if (holder.balance === null) {
-          return null;
+            return null;
         }
-        const balanceNumber = holder.balance;
-        const balanceBigInt = BigInt(balanceNumber);
-        const multipliedBalance = balanceBigInt * BigInt(1e18);
-        return multipliedBalance.toString();
-      });
+        return (BigInt(holder.balance) * BigInt(1e18)).toString()
+    });
 
     // ABI
     const abi = [
@@ -105,7 +98,7 @@ export default function SummaryComponent() {
         args: [
             store.appStatusStore.tokenName,
             store.appStatusStore.tokenSymbol,
-            store.appStatusStore.domain,
+            store.appStatusStore.organization,
             addresses,
             balances,
             [(BigInt(1e16) * BigInt(store.appStatusStore.support!)).toString(),
@@ -119,18 +112,16 @@ export default function SummaryComponent() {
         ]
     })
 
+    /* ADD PROPER TRANSACTION HANDLING */
     // Execute contract function
     const { data, isLoading, write } = useContractWrite(config)
 
     // State to store the transaction status
     const [isMined, setIsMined] = useState(false);
     const [isSending, setIsSending] = useState(false);
-
-    // Functions to manage the back button
-    const router = useRouter()
-
-    function handleBackButton() {
-        router.push('/augmented-bonding-curve')
+    const handleLaunch = () => {
+        setIsSending(true);
+        write?.();
     }
 
     // Effect to check the transaction status
@@ -146,15 +137,12 @@ export default function SummaryComponent() {
                 }
             }, 15000); // Check every 5 seconds
 
-        
+
             return () => clearInterval(interval); // Clean up on unmount
         }
     }, [data]);
 
-    const handleLaunch = () => {
-        setIsSending(true);
-        write?.();
-    }
+    /* TILL HERE ADD PROPER TRANSACTION HANDLING */
 
     return (
         <div>
@@ -169,7 +157,7 @@ export default function SummaryComponent() {
                 <Box borderWidth="1px" borderRadius="lg" padding="6" boxShadow="lg" width="50vw">
                     <VStack spacing={4}>
                         <Text fontSize="2xl" as="b" p="1rem" textAlign="center">Your DAO has been successfully created!</Text>
-                        <Button onClick={() => openInNewTab("https://xdai.aragon.blossom.software/#/" + store.appStatusStore.domain)}>See DAO</Button>
+                        <Button onClick={() => window.open("https://xdai.aragon.blossom.software/#/" + store.appStatusStore.organization, "_blank", "noreferrer")}>See DAO</Button>
                     </VStack>
                 </Box>
             ) : (
@@ -189,7 +177,7 @@ export default function SummaryComponent() {
                                 </h2>
                                 <AccordionPanel pb={4}>
                                     <Text>
-                                        Domain: <Text as="b">{store.appStatusStore.domain + '.aragonid.eth'}</Text>
+                                        Organization domain: <Text as="b">{store.appStatusStore.organization + '.aragonid.eth'}</Text>
                                     </Text>
                                 </AccordionPanel>
                             </AccordionItem>
@@ -267,9 +255,10 @@ export default function SummaryComponent() {
                                 </AccordionPanel>
                             </AccordionItem>
                         </Accordion>
+                        <Checkbox onChange={(e) => setValidated(e.target.checked)}>Did you verify that all the information is correct?</Checkbox>
                         <HStack>
-                            <Button alignSelf="flex-start" onClick={handleBackButton} colorScheme="blue">Back</Button>
-                            <Button alignSelf="flex-end" onClick={handleLaunch} colorScheme="red">Launch</Button>
+                            <Button alignSelf="flex-start" onClick={() => router.push('/augmented-bonding-curve')} colorScheme="blue">Back</Button>
+                            <Button alignSelf="flex-end" isDisabled={!validated} onClick={handleLaunch} colorScheme="red">Launch</Button>
                         </HStack>
                     </VStack>
                 </Box>

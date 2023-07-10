@@ -1,6 +1,6 @@
-import { Box, Center, Text } from "@chakra-ui/react";
+import { Center } from "@chakra-ui/react";
 import ConfigureTemplateComponent from "../components/ConfigureTemplateComponent";
-import HeaderComponent from "../components/Header";
+import HeaderComponent from "../components/HeaderComponent";
 
 export default function ConfigureTemplatePage() {
 

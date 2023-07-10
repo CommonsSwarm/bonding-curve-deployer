@@ -1,5 +1,5 @@
 export default class AppStatusStore { 
-    domain: string|null = null;
+    organization: string|null = null;
     support: number|null = 50;
     minApproval: number|null = 15;
     days: number|null = 1;
